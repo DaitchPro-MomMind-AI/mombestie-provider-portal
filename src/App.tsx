@@ -34,6 +34,258 @@ const NAV = [
 type NavId = typeof NAV[number]['id']
 
 const COMMISSION_PCT = 10 // reference value — real commission is server-side, per country (see ARCHITECTURE.md §9)
+const APPLICATION_FEE = 25 // reference value — country-configurable, see ARCHITECTURE.md §9/§7.2
+
+// Onboarding pipeline per the master spec §11: registration -> identity ->
+// category -> service info -> experience -> service area -> pricing ->
+// availability -> documents -> application fee -> payout setup -> admin
+// review. Ends in Pending Verification, never the full dashboard — a
+// provider cannot self-verify (see docs/ARCHITECTURE.md §10).
+type ProviderStatus = 'draft' | 'submitted' | 'pending_verification' | 'approved' | 'rejected' | 'suspended' | 'expired'
+
+const CATEGORIES = ['Babysitting', 'Nanny Services', 'Postpartum Support', 'Housecleaning', 'Meal Preparation', 'Baby Photography', 'Babyproofing', 'Family Support', 'Other']
+
+interface OnboardingData {
+  fullName: string
+  email: string
+  phone: string
+  address: string
+  categories: string[]
+  businessName: string
+  description: string
+  experienceYears: string
+  serviceCity: string
+  serviceRadius: string
+  hourlyRate: string
+  availability: string[]
+  idUploaded: boolean
+  backgroundCheckConsent: boolean
+  certifications: boolean
+  feePaid: boolean
+  payoutConnected: boolean
+}
+
+const EMPTY_ONBOARDING: OnboardingData = {
+  fullName: '', email: '', phone: '', address: '',
+  categories: [], businessName: '', description: '', experienceYears: '',
+  serviceCity: '', serviceRadius: '10', hourlyRate: '',
+  availability: [], idUploaded: false, backgroundCheckConsent: false, certifications: false,
+  feePaid: false, payoutConnected: false,
+}
+
+const ONBOARDING_STEPS = ['Account', 'Identity', 'Category', 'Service Details', 'Area & Pricing', 'Availability', 'Documents & Fee', 'Payout'] as const
+
+function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingData) => void; onCancel: () => void }) {
+  const [step, setStep] = useState(1)
+  const [data, setData] = useState<OnboardingData>(EMPTY_ONBOARDING)
+  const totalSteps = ONBOARDING_STEPS.length
+
+  // Functional form throughout — reading `data.x` directly from the render
+  // closure (as an earlier version of this did) computes toggles against a
+  // stale snapshot whenever two updates land in the same React batch, which
+  // silently drops one of them. Always derive the next value from the
+  // updater's own `d`, never the outer `data`.
+  const update = (patch: Partial<OnboardingData> | ((d: OnboardingData) => Partial<OnboardingData>)) =>
+    setData(d => ({ ...d, ...(typeof patch === 'function' ? patch(d) : patch) }))
+  const toggleCategory = (c: string) => update(d => ({ categories: d.categories.includes(c) ? d.categories.filter(x => x !== c) : [...d.categories, c] }))
+  const toggleDay = (day: string) => update(d => ({ availability: d.availability.includes(day) ? d.availability.filter(x => x !== day) : [...d.availability, day] }))
+
+  const canAdvance = (() => {
+    switch (step) {
+      case 1: return data.fullName.trim() && data.email.trim()
+      case 2: return data.phone.trim() && data.address.trim()
+      case 3: return data.categories.length > 0
+      case 4: return data.businessName.trim() && data.experienceYears.trim()
+      case 5: return data.serviceCity.trim() && data.hourlyRate.trim()
+      case 6: return data.availability.length > 0
+      case 7: return data.idUploaded && data.backgroundCheckConsent && data.feePaid
+      case 8: return data.payoutConnected
+      default: return true
+    }
+  })()
+
+  const next = () => step < totalSteps ? setStep(step + 1) : onSubmit(data)
+  const back = () => step > 1 ? setStep(step - 1) : onCancel()
+
+  return (
+    <div className="min-h-screen bg-[#FFFCFA] px-4 py-8 flex items-start justify-center">
+      <div className="w-full max-w-lg">
+        {/* Step indicator */}
+        <div className="flex items-center gap-1 mb-6">
+          {ONBOARDING_STEPS.map((label, i) => {
+            const s = i + 1
+            return (
+              <div key={label} className="flex items-center gap-1 flex-1">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0`}
+                  style={{ background: step > s ? '#55A67A' : step === s ? 'linear-gradient(135deg,#EE674E,#F47B66)' : '#F0E8E4', color: step >= s ? 'white' : '#B0A8A4' }}>
+                  {step > s ? '✓' : s}
+                </div>
+                {s < totalSteps && <div className="h-px flex-1" style={{ background: step > s ? '#55A67A' : '#F0E8E4' }} />}
+              </div>
+            )
+          })}
+        </div>
+        <p className="text-xs font-semibold text-[#EE674E] uppercase tracking-wide mb-1">Step {step} of {totalSteps}</p>
+        <h1 className="font-display text-2xl text-[#242424] mb-5">{ONBOARDING_STEPS[step - 1]}</h1>
+
+        <div className="glass-card-strong rounded-3xl p-6 space-y-4">
+          {step === 1 && (<>
+            <input value={data.fullName} onChange={e => update({ fullName: e.target.value })} placeholder="Full name" className="cartoon-input w-full px-4 py-3 text-sm" />
+            <input value={data.email} onChange={e => update({ email: e.target.value })} placeholder="Email address" className="cartoon-input w-full px-4 py-3 text-sm" />
+            <input type="password" placeholder="Password" className="cartoon-input w-full px-4 py-3 text-sm" />
+          </>)}
+
+          {step === 2 && (<>
+            <p className="text-xs text-[#6E6E73]">Required for identity verification — never shown on your public profile.</p>
+            <input value={data.phone} onChange={e => update({ phone: e.target.value })} placeholder="Phone number" className="cartoon-input w-full px-4 py-3 text-sm" />
+            <input value={data.address} onChange={e => update({ address: e.target.value })} placeholder="Home address" className="cartoon-input w-full px-4 py-3 text-sm" />
+          </>)}
+
+          {step === 3 && (<>
+            <p className="text-xs text-[#6E6E73] mb-1">Select every category you offer (at least one).</p>
+            <div className="grid grid-cols-2 gap-2">
+              {CATEGORIES.map(c => (
+                <button key={c} onClick={() => toggleCategory(c)}
+                  className="action-btn py-2.5 px-3 rounded-xl text-xs font-semibold text-left"
+                  style={data.categories.includes(c)
+                    ? { background: '#FFD6C9', border: '2px solid #EE674E', color: '#C94930' }
+                    : { background: '#FFF8F4', border: '2px solid #F0E8E4', color: '#6E6E73' }}>
+                  {data.categories.includes(c) ? '✓ ' : ''}{c}
+                </button>
+              ))}
+            </div>
+          </>)}
+
+          {step === 4 && (<>
+            <input value={data.businessName} onChange={e => update({ businessName: e.target.value })} placeholder="Business / display name" className="cartoon-input w-full px-4 py-3 text-sm" />
+            <textarea value={data.description} onChange={e => update({ description: e.target.value })} placeholder="Describe your experience and approach" rows={3} className="cartoon-input w-full px-4 py-3 text-sm" />
+            <input value={data.experienceYears} onChange={e => update({ experienceYears: e.target.value.replace(/\D/g, '') })} placeholder="Years of experience" inputMode="numeric" className="cartoon-input w-full px-4 py-3 text-sm" />
+          </>)}
+
+          {step === 5 && (<>
+            <input value={data.serviceCity} onChange={e => update({ serviceCity: e.target.value })} placeholder="City / service area" className="cartoon-input w-full px-4 py-3 text-sm" />
+            <div>
+              <label className="text-xs text-[#6E6E73] mb-1 block">Service radius: {data.serviceRadius} mi</label>
+              <input type="range" min="1" max="50" value={data.serviceRadius} onChange={e => update({ serviceRadius: e.target.value })} className="w-full" />
+            </div>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[#6E6E73]">$</span>
+              <input value={data.hourlyRate} onChange={e => update({ hourlyRate: e.target.value.replace(/\D/g, '') })} placeholder="Hourly rate" inputMode="numeric" className="cartoon-input w-full pl-7 pr-4 py-3 text-sm" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#6E6E73]">/hr</span>
+            </div>
+          </>)}
+
+          {step === 6 && (<>
+            <p className="text-xs text-[#6E6E73] mb-1">Which days are you generally available?</p>
+            <div className="grid grid-cols-7 gap-1.5">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+                <button key={d} onClick={() => toggleDay(d)}
+                  className="action-btn py-3 rounded-xl text-xs font-semibold"
+                  style={data.availability.includes(d)
+                    ? { background: '#FFD6C9', color: '#C94930', border: '2px solid #EE674E' }
+                    : { background: '#F0E8E4', color: '#6E6E73', border: '2px solid transparent' }}>
+                  {d}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-[#6E6E73]">You'll set specific hours later — this is never shown to customers as live availability until you save real hours.</p>
+          </>)}
+
+          {step === 7 && (<>
+            <p className="text-xs font-semibold text-[#6E6E73] uppercase tracking-wide">Required documents</p>
+            {[
+              { key: 'idUploaded' as const, label: 'Government-issued photo ID' },
+              { key: 'backgroundCheckConsent' as const, label: 'Consent to background check' },
+              { key: 'certifications' as const, label: 'Certifications (optional — CPR, first aid, etc.)' },
+            ].map(doc => (
+              <button key={doc.key} onClick={() => update(d => ({ [doc.key]: !d[doc.key] }))}
+                className="action-btn w-full flex items-center gap-3 p-3 rounded-xl text-left"
+                style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
+                <div className={`w-5 h-5 rounded-md flex items-center justify-center text-xs flex-shrink-0 ${data[doc.key] ? 'bg-[#55A67A] text-white' : 'bg-[#F0E8E4]'}`}>
+                  {data[doc.key] ? '✓' : ''}
+                </div>
+                <span className="text-sm text-[#242424]">{doc.label}</span>
+              </button>
+            ))}
+            <div className="pt-2 border-t border-[#F0E8E4] mt-2">
+              <p className="text-xs font-semibold text-[#6E6E73] uppercase tracking-wide mb-2">Application fee</p>
+              <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
+                <div>
+                  <p className="text-sm font-semibold text-[#242424]">${APPLICATION_FEE} one-time</p>
+                  <p className="text-[11px] text-[#6E6E73]">No monthly fee, ever — see Marketing site.</p>
+                </div>
+                <button onClick={() => update(d => ({ feePaid: !d.feePaid }))}
+                  className={`action-btn text-xs font-semibold px-3 py-2 rounded-lg ${data.feePaid ? 'bg-[#E8F5EE] text-[#55A67A]' : 'coral-gradient text-white'}`}>
+                  {data.feePaid ? '✓ Paid (demo)' : 'Pay (demo)'}
+                </button>
+              </div>
+              <p className="text-[11px] text-[#6E6E73] mt-1.5">No real charge — no payment processor is connected in this environment. See docs/ARCHITECTURE.md §9.</p>
+            </div>
+          </>)}
+
+          {step === 8 && (<>
+            <p className="text-xs text-[#6E6E73]">Payouts require a Stripe Connect (or equivalent) account. This is a placeholder — no real account is created.</p>
+            <button onClick={() => update(d => ({ payoutConnected: !d.payoutConnected }))}
+              className={`action-btn w-full py-3.5 rounded-2xl font-semibold text-sm ${data.payoutConnected ? 'bg-[#E8F5EE] text-[#55A67A]' : 'bg-[#FFD6C9] text-[#C94930]'}`}>
+              {data.payoutConnected ? '✓ Payout method connected (demo)' : 'Connect Payout Method (demo)'}
+            </button>
+            <div className="rounded-xl p-3 mt-2" style={{ background: '#FFF8F4', border: '1.5px dashed #F0E8E4' }}>
+              <p className="text-xs font-semibold text-[#242424] mb-1">Ready to submit</p>
+              <p className="text-[11px] text-[#6E6E73]">Submitting sends your application for admin review. You'll see "Pending Verification" until an admin approves — a provider account can never self-verify.</p>
+            </div>
+          </>)}
+        </div>
+
+        <div className="flex gap-3 mt-5">
+          <button onClick={back} className="action-btn flex-1 bg-[#F0E8E4] text-[#6E6E73] font-semibold py-3 rounded-2xl">
+            {step === 1 ? 'Cancel' : 'Back'}
+          </button>
+          <button onClick={next} disabled={!canAdvance}
+            className="action-btn flex-1 coral-gradient text-white font-semibold py-3 rounded-2xl disabled:opacity-40">
+            {step === totalSteps ? 'Submit Application' : 'Next'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PendingVerificationScreen({ data, onBackToLogin }: { data: OnboardingData; onBackToLogin: () => void }) {
+  const steps: { label: string; done: boolean }[] = [
+    { label: 'Identity submitted', done: true },
+    { label: 'Category & service details submitted', done: true },
+    { label: 'Documents uploaded', done: data.idUploaded },
+    { label: 'Application fee paid (demo)', done: data.feePaid },
+    { label: 'Payout method connected (demo)', done: data.payoutConnected },
+    { label: 'Admin review', done: false },
+  ]
+  return (
+    <div className="min-h-screen bg-[#FFFCFA] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm glass-card-strong rounded-3xl p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-[#FEF3CD] flex items-center justify-center text-3xl mx-auto mb-4">⏳</div>
+        <h1 className="font-display text-2xl text-[#242424] mb-1">Application Submitted</h1>
+        <p className="text-sm text-[#6E6E73] mb-6">{data.businessName || data.fullName} is now <span className="font-semibold text-[#B8860B]">Pending Verification</span>.</p>
+        <div className="text-left space-y-2.5 mb-6">
+          {steps.map(s => (
+            <div key={s.label} className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 ${s.done ? 'bg-[#E8F5EE] text-[#55A67A]' : 'bg-[#F0E8E4] text-[#6E6E73]'}`}>
+                {s.done ? '✓' : '·'}
+              </div>
+              <p className={`text-sm ${s.done ? 'text-[#242424]' : 'text-[#6E6E73]'}`}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-[#6E6E73] mb-5">
+          Your profile stays inactive in the marketplace until an admin approves it — this portal has no ability to
+          self-verify. You'll be notified once reviewed.
+        </p>
+        <button onClick={onBackToLogin} className="action-btn w-full bg-[#F0E8E4] text-[#6E6E73] font-semibold py-3 rounded-2xl">
+          Back to Sign In
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function StatusPill({ status }: { status: BookingStatus }) {
   const styles: Record<BookingStatus, string> = {
@@ -44,7 +296,7 @@ function StatusPill({ status }: { status: BookingStatus }) {
   return <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${styles[status]}`}>{status}</span>
 }
 
-function LoginGate({ onLogin }: { onLogin: () => void }) {
+function LoginGate({ onLogin, onStartRegistration }: { onLogin: () => void; onStartRegistration: () => void }) {
   const [email, setEmail] = useState('')
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FFFCFA] px-4">
@@ -56,7 +308,7 @@ function LoginGate({ onLogin }: { onLogin: () => void }) {
           className="cartoon-input w-full px-4 py-3 text-sm mb-3" />
         <input type="password" placeholder="Password" className="cartoon-input w-full px-4 py-3 text-sm mb-5" />
         <button onClick={onLogin} className="action-btn w-full coral-gradient text-white font-semibold py-3 rounded-2xl mb-3">Sign In</button>
-        <button className="action-btn w-full bg-[#FFD6C9] text-[#C94930] font-semibold py-3 rounded-2xl">Start Provider Registration</button>
+        <button onClick={onStartRegistration} className="action-btn w-full bg-[#FFD6C9] text-[#C94930] font-semibold py-3 rounded-2xl">Start Provider Registration</button>
       </div>
     </div>
   )
@@ -91,10 +343,23 @@ function Card({ title, children }: { title?: string; children: React.ReactNode }
 }
 
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(false)
+  // 'login' -> existing approved persona signs in straight to the dashboard
+  // (Jordan's Care Services demo data). 'onboarding' -> new provider goes
+  // through the pipeline in ONBOARDING_STEPS. 'pending' -> submitted,
+  // waiting on admin review; never the dashboard, per docs/ARCHITECTURE.md §10.
+  const [view, setView] = useState<'login' | 'onboarding' | 'pending' | 'dashboard'>('login')
+  const [submittedData, setSubmittedData] = useState<OnboardingData | null>(null)
   const [nav, setNav] = useState<NavId>('overview')
 
-  if (!loggedIn) return <LoginGate onLogin={() => setLoggedIn(true)} />
+  if (view === 'onboarding') {
+    return <OnboardingWizard onSubmit={d => { setSubmittedData(d); setView('pending') }} onCancel={() => setView('login')} />
+  }
+  if (view === 'pending' && submittedData) {
+    return <PendingVerificationScreen data={submittedData} onBackToLogin={() => { setView('login'); setSubmittedData(null) }} />
+  }
+  if (view !== 'dashboard') {
+    return <LoginGate onLogin={() => setView('dashboard')} onStartRegistration={() => setView('onboarding')} />
+  }
 
   const totalEarned = BOOKINGS.filter(b => b.status === 'Completed').reduce((s, b) => s + b.amount, 0)
   const commission = Math.round(totalEarned * (COMMISSION_PCT / 100) * 100) / 100
