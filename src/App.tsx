@@ -6,8 +6,8 @@ import { useState } from 'react'
 // ../../docs/ARCHITECTURE.md §10 for the real Provider/Booking service contracts
 // this UI is designed to be wired to.
 
-type BookingStatus = 'Requested' | 'Confirmed' | 'Completed'
-const BOOKINGS: { id: string; customer: string; service: string; when: string; status: BookingStatus; amount: number }[] = [
+type BookingStatus = 'Requested' | 'Confirmed' | 'Completed' | 'Declined'
+const INITIAL_BOOKINGS: { id: string; customer: string; service: string; when: string; status: BookingStatus; amount: number }[] = [
   { id: 'bk_1', customer: 'Sarah M.', service: 'Evening babysitting (3h)', when: 'Today, 6:00 PM', status: 'Requested', amount: 75 },
   { id: 'bk_2', customer: 'Amara O.', service: 'Postpartum support (4h)', when: 'Tomorrow, 9:00 AM', status: 'Confirmed', amount: 140 },
   { id: 'bk_3', customer: 'Wei L.', service: 'Meal preparation', when: 'Aug 8', status: 'Completed', amount: 60 },
@@ -292,6 +292,7 @@ function StatusPill({ status }: { status: BookingStatus }) {
     Requested: 'bg-[#FEF7E0] text-[#B8860B]',
     Confirmed: 'bg-[#EBF2FC] text-[#6299D5]',
     Completed: 'bg-[#E8F5EE] text-[#55A67A]',
+    Declined: 'bg-[#F0E8E4] text-[#6E6E73]',
   }
   return <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${styles[status]}`}>{status}</span>
 }
@@ -350,6 +351,7 @@ export default function App() {
   const [view, setView] = useState<'login' | 'onboarding' | 'pending' | 'dashboard'>('login')
   const [submittedData, setSubmittedData] = useState<OnboardingData | null>(null)
   const [nav, setNav] = useState<NavId>('overview')
+  const [bookings, setBookings] = useState(INITIAL_BOOKINGS)
 
   if (view === 'onboarding') {
     return <OnboardingWizard onSubmit={d => { setSubmittedData(d); setView('pending') }} onCancel={() => setView('login')} />
@@ -361,7 +363,15 @@ export default function App() {
     return <LoginGate onLogin={() => setView('dashboard')} onStartRegistration={() => setView('onboarding')} />
   }
 
-  const totalEarned = BOOKINGS.filter(b => b.status === 'Completed').reduce((s, b) => s + b.amount, 0)
+  // Accept moves Requested -> Confirmed (a real commitment to show up);
+  // Decline moves it to Declined rather than deleting it, so the provider
+  // still has a record of what they turned down. Neither writes anywhere
+  // outside this session — there's no shared backend with the customer app
+  // yet, so the requester never actually sees this decision (documented gap).
+  const decideBooking = (id: string, next: 'Confirmed' | 'Declined') =>
+    setBookings(list => list.map(b => b.id === id ? { ...b, status: next } : b))
+
+  const totalEarned = bookings.filter(b => b.status === 'Completed').reduce((s, b) => s + b.amount, 0)
   const commission = Math.round(totalEarned * (COMMISSION_PCT / 100) * 100) / 100
 
   return (
@@ -381,13 +391,13 @@ export default function App() {
         {nav === 'overview' && (
           <div className="space-y-5">
             <div className="grid sm:grid-cols-3 gap-4">
-              <Card title="Pending requests"><p className="font-display text-3xl text-[#242424]">{BOOKINGS.filter(b => b.status === 'Requested').length}</p></Card>
-              <Card title="Upcoming bookings"><p className="font-display text-3xl text-[#242424]">{BOOKINGS.filter(b => b.status === 'Confirmed').length}</p></Card>
+              <Card title="Pending requests"><p className="font-display text-3xl text-[#242424]">{bookings.filter(b => b.status === 'Requested').length}</p></Card>
+              <Card title="Upcoming bookings"><p className="font-display text-3xl text-[#242424]">{bookings.filter(b => b.status === 'Confirmed').length}</p></Card>
               <Card title="Rating"><p className="font-display text-3xl text-[#242424]">4.9 ★</p><p className="text-xs text-[#6E6E73] mt-1">32 reviews</p></Card>
             </div>
             <Card title="Recent activity">
               <div className="space-y-3">
-                {BOOKINGS.map(b => (
+                {bookings.map(b => (
                   <div key={b.id} className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-[#242424]">{b.customer} — {b.service}</p>
@@ -403,7 +413,7 @@ export default function App() {
 
         {nav === 'bookings' && (
           <div className="space-y-3">
-            {BOOKINGS.map(b => (
+            {bookings.map(b => (
               <Card key={b.id}>
                 <div className="flex items-center justify-between">
                   <div>
@@ -417,8 +427,8 @@ export default function App() {
                 </div>
                 {b.status === 'Requested' && (
                   <div className="flex gap-2 mt-4">
-                    <button className="action-btn flex-1 coral-gradient text-white text-sm font-semibold py-2 rounded-xl">Accept</button>
-                    <button className="action-btn flex-1 bg-[#F0E8E4] text-[#6E6E73] text-sm font-semibold py-2 rounded-xl">Decline</button>
+                    <button onClick={() => decideBooking(b.id, 'Confirmed')} className="action-btn flex-1 coral-gradient text-white text-sm font-semibold py-2 rounded-xl">Accept</button>
+                    <button onClick={() => decideBooking(b.id, 'Declined')} className="action-btn flex-1 bg-[#F0E8E4] text-[#6E6E73] text-sm font-semibold py-2 rounded-xl">Decline</button>
                   </div>
                 )}
               </Card>
