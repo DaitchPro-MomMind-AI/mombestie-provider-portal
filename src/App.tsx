@@ -306,7 +306,7 @@ function StatusPill({ status }: { status: BookingStatus }) {
 // Providers work from their phones (see docs/ARCHITECTURE.md native-app
 // section, 2026-08-13) so this app is native-first the same way the
 // customer app is, not a "responsive dashboard that also fits on mobile."
-function PhoneShell({ children }: { children: React.ReactNode }) {
+function PhoneShell({ children, dark }: { children: React.ReactNode; dark?: boolean }) {
   const [vw, setVw] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 844)
   useEffect(() => {
@@ -319,11 +319,12 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
   const frameH = 844
   const scale = isMobile ? 1 : Math.min(1, (vw * 0.9) / frameW, (vh * 0.95) / frameH)
   const borderRad = isMobile ? 0 : 44
+  const statusColor = dark ? '#F4F4F5' : '#242424'
 
   return (
     <div className="flex items-center justify-center overflow-hidden" style={{
       minHeight: '100dvh',
-      background: isMobile ? '#FFFCFA' : 'radial-gradient(ellipse at 20% 30%, #FFE8DE 0%, #FFF8F4 45%, #EEF4FF 100%)',
+      background: dark ? '#0E0E10' : isMobile ? '#FFFCFA' : 'radial-gradient(ellipse at 20% 30%, #FFE8DE 0%, #FFF8F4 45%, #EEF4FF 100%)',
     }}>
       {!isMobile && (
         <>
@@ -331,12 +332,12 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
           <div style={{ position: 'fixed', width: 400, height: 400, borderRadius: '50%', background: 'rgba(98,153,213,0.13)', filter: 'blur(70px)', bottom: '-80px', right: '-100px', pointerEvents: 'none' }} />
         </>
       )}
-      <div className="relative flex flex-col overflow-hidden" style={{
+      <div className="relative flex flex-col overflow-hidden" data-dark={dark ? 'true' : undefined} style={{
         width: isMobile ? '100%' : frameW,
         height: isMobile ? '100dvh' : frameH,
         maxWidth: isMobile ? '100%' : frameW,
         borderRadius: borderRad,
-        background: '#FFFCFA',
+        background: dark ? '#18181B' : '#FFFCFA',
         transform: isMobile ? 'none' : `scale(${scale})`,
         transformOrigin: 'center center',
         boxShadow: isMobile ? 'none' : '0 32px 80px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.10)',
@@ -345,20 +346,20 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
         {/* Status bar -- purely visual, same mockup pattern as the customer
             app, so a desktop preview reads as a phone screenshot. */}
         <div className="flex items-center justify-between px-6 pt-4 pb-1 flex-shrink-0">
-          <span className="text-xs font-semibold text-[#242424]">9:41</span>
+          <span className="text-xs font-semibold" style={{ color: statusColor }}>9:41</span>
           <div className="flex items-center gap-1.5">
             <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-              <rect x="0" y="6" width="3" height="6" rx="0.5" fill="#242424" />
-              <rect x="4.5" y="4" width="3" height="8" rx="0.5" fill="#242424" />
-              <rect x="9" y="2" width="3" height="10" rx="0.5" fill="#242424" />
-              <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" fill="#242424" />
+              <rect x="0" y="6" width="3" height="6" rx="0.5" fill={statusColor} />
+              <rect x="4.5" y="4" width="3" height="8" rx="0.5" fill={statusColor} />
+              <rect x="9" y="2" width="3" height="10" rx="0.5" fill={statusColor} />
+              <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" fill={statusColor} />
             </svg>
             <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-              <path d="M8 2.5C10.5 2.5 12.8 3.6 14.3 5.4L15.5 4.1C13.7 2 11 .8 8 .8s-5.7 1.2-7.5 3.3L1.7 5.4C3.2 3.6 5.5 2.5 8 2.5z" fill="#242424" />
-              <path d="M8 5.5c1.6 0 3 .7 4 1.8l1.2-1.3C11.7 4.6 10 3.8 8 3.8S4.3 4.6 2.8 6L4 7.3C5 6.2 6.4 5.5 8 5.5z" fill="#242424" />
-              <circle cx="8" cy="10.5" r="1.5" fill="#242424" />
+              <path d="M8 2.5C10.5 2.5 12.8 3.6 14.3 5.4L15.5 4.1C13.7 2 11 .8 8 .8s-5.7 1.2-7.5 3.3L1.7 5.4C3.2 3.6 5.5 2.5 8 2.5z" fill={statusColor} />
+              <path d="M8 5.5c1.6 0 3 .7 4 1.8l1.2-1.3C11.7 4.6 10 3.8 8 3.8S4.3 4.6 2.8 6L4 7.3C5 6.2 6.4 5.5 8 5.5z" fill={statusColor} />
+              <circle cx="8" cy="10.5" r="1.5" fill={statusColor} />
             </svg>
-            <div className="w-5.5 h-3 rounded-sm border border-[#242424]/40 p-0.5 flex">
+            <div className="w-5.5 h-3 rounded-sm p-0.5 flex" style={{ border: `1px solid ${dark ? 'rgba(244,244,245,0.4)' : 'rgba(36,36,36,0.4)'}` }}>
               <div className="w-3/4 h-full rounded-xs bg-[#55A67A]" />
             </div>
           </div>
@@ -412,6 +413,17 @@ export default function App() {
   const [nav, setNav] = useState<NavId>('overview')
   const [bookings, setBookings] = useState(INITIAL_BOOKINGS)
 
+  // Real dark mode -- device-level preference (not per-account), persisted
+  // across sessions, same as most native apps. See index.css for the
+  // [data-dark="true"] overrides this actually drives.
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.localStorage.getItem('mombestie_provider_dark') === 'true'
+  })
+  useEffect(() => {
+    window.localStorage.setItem('mombestie_provider_dark', darkMode ? 'true' : 'false')
+  }, [darkMode])
+
   const routeAfterAuth = async (uid: string) => {
     setUserId(uid)
     const [familyApp, healthcareApp] = await Promise.all([getMyProviderApplication(uid), getMyHealthcareApplication(uid)])
@@ -433,21 +445,21 @@ export default function App() {
   }
 
   if (view === 'loading') {
-    return <PhoneShell><div className="h-full flex items-center justify-center bg-[#FFFCFA]"><span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" /></div></PhoneShell>
+    return <PhoneShell dark={darkMode}><div className="h-full flex items-center justify-center bg-[#FFFCFA]"><span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" /></div></PhoneShell>
   }
 
   if (view === 'auth') {
-    return <PhoneShell><AuthGate onSignedIn={async () => { const user = await getCurrentUser(); if (user) await routeAfterAuth(user.id) }} /></PhoneShell>
+    return <PhoneShell dark={darkMode}><AuthGate onSignedIn={async () => { const user = await getCurrentUser(); if (user) await routeAfterAuth(user.id) }} /></PhoneShell>
   }
 
   if (view === 'choose-type') {
-    return <PhoneShell><ProviderTypeChoice
+    return <PhoneShell dark={darkMode}><ProviderTypeChoice
       onChoose={k => setView(k === 'family' ? 'onboarding-family' : 'onboarding-healthcare')}
       onCancel={() => setView(hasApplication ? 'dashboard' : 'auth')} /></PhoneShell>
   }
 
   if (view === 'onboarding-family') {
-    return <PhoneShell><OnboardingWizard
+    return <PhoneShell dark={darkMode}><OnboardingWizard
       onSubmit={async d => {
         if (!userId) { setView('auth'); return }
         await submitProviderApplication({
@@ -467,13 +479,13 @@ export default function App() {
   }
 
   if (view === 'onboarding-healthcare') {
-    return <PhoneShell><HealthcareWizard userId={userId!}
+    return <PhoneShell dark={darkMode}><HealthcareWizard userId={userId!}
       onSubmitted={() => { setPendingKind('healthcare'); setHasApplication(true); setView('pending') }}
       onCancel={() => setView('choose-type')} /></PhoneShell>
   }
 
   if (view === 'pending') {
-    return <PhoneShell><PendingStatusScreen userId={userId!} kind={pendingKind} onBackToLogin={handleSignOut} /></PhoneShell>
+    return <PhoneShell dark={darkMode}><PendingStatusScreen userId={userId!} kind={pendingKind} onBackToLogin={handleSignOut} /></PhoneShell>
   }
 
   // Accept moves Requested -> Confirmed (a real commitment to show up);
@@ -491,7 +503,7 @@ export default function App() {
   const currentLabel = nav === 'more' ? 'More' : NAV.find(n => n.id === nav)?.label
 
   return (
-    <PhoneShell>
+    <PhoneShell dark={darkMode}>
       <div className="flex items-center gap-2 px-5 pt-2 pb-3 flex-shrink-0">
         {isMoreItem && (
           <button onClick={() => setNav('more')} className="text-lg text-[#6E6E73] -ml-1 px-1">←</button>
@@ -622,7 +634,7 @@ export default function App() {
           </Card>
         )}
 
-        {nav === 'settings' && <SettingsPanel onSignOut={handleSignOut} />}
+        {nav === 'settings' && <SettingsPanel onSignOut={handleSignOut} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)} />}
 
         {nav === 'more' && (
           <div className="space-y-2">

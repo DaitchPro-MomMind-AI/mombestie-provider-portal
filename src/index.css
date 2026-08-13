@@ -147,6 +147,23 @@ body {
 }
 .logo-glow { animation: logoGlow 3s ease-in-out infinite; }
 
+/* Real dark mode (Settings screen toggle, 2026-08-13). Most of this app's
+   colors are literal Tailwind arbitrary values (text-[#242424], etc.)
+   rather than design tokens, so a per-component rewrite would be a much
+   bigger change than this pass -- instead this retargets the handful of
+   classes actually used everywhere (confirmed by grep: 64x text-[#6E6E73],
+   34x text-[#242424], etc.) directly by their literal class selector.
+   Genuinely changes what renders, not a decorative toggle. */
+[data-dark="true"] .text-\[\#242424\] { color: #F4F4F5; }
+[data-dark="true"] .text-\[\#6E6E73\] { color: #A1A1AA; }
+[data-dark="true"] .text-\[\#B0A8A4\] { color: #71717A; }
+[data-dark="true"] .bg-\[\#FFFCFA\] { background-color: #18181B; }
+[data-dark="true"] .bg-\[\#FFF8F4\] { background-color: #232326; }
+[data-dark="true"] .bg-\[\#F0E8E4\] { background-color: #2E2E32; }
+[data-dark="true"] .border-\[\#F0E8E4\] { border-color: #3F3F46; }
+[data-dark="true"] .bg-white { background-color: #232326; }
+[data-dark="true"] .divide-\[\#F6EDE8\] > :not([hidden]) ~ :not([hidden]) { border-color: #3F3F46; }
+
 @media (prefers-reduced-motion: reduce) {
   .blob, .logo-glow { animation: none !important; }
 }
