@@ -1,4 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getCurrentUser, signOut, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication } from './services'
+import { AuthGate } from './screens/AuthGate'
+import { ProviderTypeChoice } from './screens/ProviderTypeChoice'
+import { HealthcareWizard } from './screens/HealthcareWizard'
+import { PendingStatusScreen } from './screens/PendingStatusScreen'
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
 // Everything here is a frontend fixture, same status as the customer app's
@@ -250,43 +255,6 @@ function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingD
   )
 }
 
-function PendingVerificationScreen({ data, onBackToLogin }: { data: OnboardingData; onBackToLogin: () => void }) {
-  const steps: { label: string; done: boolean }[] = [
-    { label: 'Identity submitted', done: true },
-    { label: 'Category & service details submitted', done: true },
-    { label: 'Documents uploaded', done: data.idUploaded },
-    { label: 'Application fee paid (demo)', done: data.feePaid },
-    { label: 'Payout method connected (demo)', done: data.payoutConnected },
-    { label: 'Admin review', done: false },
-  ]
-  return (
-    <div className="min-h-screen bg-[#FFFCFA] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm glass-card-strong rounded-3xl p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-[#FEF3CD] flex items-center justify-center text-3xl mx-auto mb-4">⏳</div>
-        <h1 className="font-display text-2xl text-[#242424] mb-1">Application Submitted</h1>
-        <p className="text-sm text-[#6E6E73] mb-6">{data.businessName || data.fullName} is now <span className="font-semibold text-[#B8860B]">Pending Verification</span>.</p>
-        <div className="text-left space-y-2.5 mb-6">
-          {steps.map(s => (
-            <div key={s.label} className="flex items-center gap-3">
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 ${s.done ? 'bg-[#E8F5EE] text-[#55A67A]' : 'bg-[#F0E8E4] text-[#6E6E73]'}`}>
-                {s.done ? '✓' : '·'}
-              </div>
-              <p className={`text-sm ${s.done ? 'text-[#242424]' : 'text-[#6E6E73]'}`}>{s.label}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs text-[#6E6E73] mb-5">
-          Your profile stays inactive in the marketplace until an admin approves it — this portal has no ability to
-          self-verify. You'll be notified once reviewed.
-        </p>
-        <button onClick={onBackToLogin} className="action-btn w-full bg-[#F0E8E4] text-[#6E6E73] font-semibold py-3 rounded-2xl">
-          Back to Sign In
-        </button>
-      </div>
-    </div>
-  )
-}
-
 function StatusPill({ status }: { status: BookingStatus }) {
   const styles: Record<BookingStatus, string> = {
     Requested: 'bg-[#FEF7E0] text-[#B8860B]',
@@ -297,32 +265,14 @@ function StatusPill({ status }: { status: BookingStatus }) {
   return <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${styles[status]}`}>{status}</span>
 }
 
-function LoginGate({ onLogin, onStartRegistration }: { onLogin: () => void; onStartRegistration: () => void }) {
-  const [email, setEmail] = useState('')
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FFFCFA] px-4">
-      <div className="w-full max-w-sm glass-card-strong rounded-3xl p-8">
-        <div className="w-12 h-12 rounded-2xl coral-gradient flex items-center justify-center text-white font-display text-xl mb-4">M</div>
-        <h1 className="font-display text-2xl text-[#242424] mb-1">Provider Portal</h1>
-        <p className="text-sm text-[#6E6E73] mb-6">Sign in to manage your MomMind services.</p>
-        <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email address"
-          className="cartoon-input w-full px-4 py-3 text-sm mb-3" />
-        <input type="password" placeholder="Password" className="cartoon-input w-full px-4 py-3 text-sm mb-5" />
-        <button onClick={onLogin} className="action-btn w-full coral-gradient text-white font-semibold py-3 rounded-2xl mb-3">Sign In</button>
-        <button onClick={onStartRegistration} className="action-btn w-full bg-[#FFD6C9] text-[#C94930] font-semibold py-3 rounded-2xl">Start Provider Registration</button>
-      </div>
-    </div>
-  )
-}
-
-function Sidebar({ active, onChange }: { active: NavId; onChange: (id: NavId) => void }) {
+function Sidebar({ active, onChange, onSignOut }: { active: NavId; onChange: (id: NavId) => void; onSignOut: () => void }) {
   return (
     <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-[#F6EDE8] bg-white p-4">
       <div className="flex items-center gap-2 px-2 mb-6">
         <div className="w-8 h-8 rounded-xl coral-gradient flex items-center justify-center text-white font-display">M</div>
         <span className="font-display text-[#242424]">Provider Portal</span>
       </div>
-      <nav className="space-y-1">
+      <nav className="space-y-1 flex-1">
         {NAV.map(n => (
           <button key={n.id} onClick={() => onChange(n.id)}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors ${active === n.id ? 'bg-[#FFD6C9] text-[#C94930] font-semibold' : 'text-[#6E6E73] hover:bg-[#FFF3EE]'}`}>
@@ -330,6 +280,7 @@ function Sidebar({ active, onChange }: { active: NavId; onChange: (id: NavId) =>
           </button>
         ))}
       </nav>
+      <button onClick={onSignOut} className="w-full text-left px-3 py-2.5 text-sm font-semibold text-[#D9534F]">🚪 Sign Out</button>
     </aside>
   )
 }
@@ -343,24 +294,84 @@ function Card({ title, children }: { title?: string; children: React.ReactNode }
   )
 }
 
+type View = 'loading' | 'auth' | 'choose-type' | 'onboarding-family' | 'onboarding-healthcare' | 'pending' | 'dashboard'
+
 export default function App() {
-  // 'login' -> existing approved persona signs in straight to the dashboard
-  // (Jordan's Care Services demo data). 'onboarding' -> new provider goes
-  // through the pipeline in ONBOARDING_STEPS. 'pending' -> submitted,
-  // waiting on admin review; never the dashboard, per docs/ARCHITECTURE.md §10.
-  const [view, setView] = useState<'login' | 'onboarding' | 'pending' | 'dashboard'>('login')
-  const [submittedData, setSubmittedData] = useState<OnboardingData | null>(null)
+  // Real Supabase session drives everything below -- 'auth' is a genuine
+  // sign-up/sign-in gate (src/screens/AuthGate.tsx), not the old "any input
+  // accepted" stub. After sign-in, real application rows decide the view:
+  // an unresolved application (either provider class) always routes to
+  // 'pending', never 'dashboard' -- a provider can never self-verify
+  // (docs/ARCHITECTURE.md §14.4/§14.9).
+  const [view, setView] = useState<View>('loading')
+  const [userId, setUserId] = useState<string | null>(null)
+  const [hasApplication, setHasApplication] = useState(false)
+  const [pendingKind, setPendingKind] = useState<'family' | 'healthcare'>('family')
   const [nav, setNav] = useState<NavId>('overview')
   const [bookings, setBookings] = useState(INITIAL_BOOKINGS)
 
-  if (view === 'onboarding') {
-    return <OnboardingWizard onSubmit={d => { setSubmittedData(d); setView('pending') }} onCancel={() => setView('login')} />
+  const routeAfterAuth = async (uid: string) => {
+    setUserId(uid)
+    const [familyApp, healthcareApp] = await Promise.all([getMyProviderApplication(uid), getMyHealthcareApplication(uid)])
+    if (familyApp && familyApp.status !== 'approved') { setPendingKind('family'); setHasApplication(true); setView('pending'); return }
+    if (healthcareApp && healthcareApp.status !== 'approved') { setPendingKind('healthcare'); setHasApplication(true); setView('pending'); return }
+    setHasApplication(Boolean(familyApp || healthcareApp))
+    setView('dashboard')
   }
-  if (view === 'pending' && submittedData) {
-    return <PendingVerificationScreen data={submittedData} onBackToLogin={() => { setView('login'); setSubmittedData(null) }} />
+
+  useEffect(() => {
+    getCurrentUser().then(user => (user ? routeAfterAuth(user.id) : setView('auth')))
+  }, [])
+
+  const handleSignOut = async () => {
+    await signOut()
+    setUserId(null)
+    setHasApplication(false)
+    setView('auth')
   }
-  if (view !== 'dashboard') {
-    return <LoginGate onLogin={() => setView('dashboard')} onStartRegistration={() => setView('onboarding')} />
+
+  if (view === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center bg-[#FFFCFA]"><span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" /></div>
+  }
+
+  if (view === 'auth') {
+    return <AuthGate onSignedIn={async () => { const user = await getCurrentUser(); if (user) await routeAfterAuth(user.id) }} />
+  }
+
+  if (view === 'choose-type') {
+    return <ProviderTypeChoice
+      onChoose={k => setView(k === 'family' ? 'onboarding-family' : 'onboarding-healthcare')}
+      onCancel={() => setView(hasApplication ? 'dashboard' : 'auth')} />
+  }
+
+  if (view === 'onboarding-family') {
+    return <OnboardingWizard
+      onSubmit={async d => {
+        if (!userId) { setView('auth'); return }
+        await submitProviderApplication({
+          user_id: userId,
+          full_name: d.fullName, phone: d.phone, address: d.address,
+          business_name: d.businessName || null, categories: d.categories, bio: d.description || null,
+          experience_years: d.experienceYears ? parseInt(d.experienceYears, 10) : null,
+          service_city: d.serviceCity || null, service_radius_mi: parseInt(d.serviceRadius, 10) || 10,
+          hourly_rate_cents: d.hourlyRate ? Math.round(parseFloat(d.hourlyRate) * 100) : null,
+          country: 'US', availability_days: d.availability,
+          id_uploaded: d.idUploaded, background_check_consent: d.backgroundCheckConsent,
+          certifications: d.certifications, application_fee_paid: d.feePaid, payout_connected: d.payoutConnected,
+        })
+        setPendingKind('family'); setHasApplication(true); setView('pending')
+      }}
+      onCancel={() => setView('choose-type')} />
+  }
+
+  if (view === 'onboarding-healthcare') {
+    return <HealthcareWizard userId={userId!}
+      onSubmitted={() => { setPendingKind('healthcare'); setHasApplication(true); setView('pending') }}
+      onCancel={() => setView('choose-type')} />
+  }
+
+  if (view === 'pending') {
+    return <PendingStatusScreen userId={userId!} kind={pendingKind} onBackToLogin={handleSignOut} />
   }
 
   // Accept moves Requested -> Confirmed (a real commitment to show up);
@@ -376,7 +387,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex bg-[#FFFCFA]">
-      <Sidebar active={nav} onChange={setNav} />
+      <Sidebar active={nav} onChange={setNav} onSignOut={handleSignOut} />
       <main className="flex-1 min-w-0 px-6 py-6 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -387,6 +398,17 @@ export default function App() {
             {NAV.map(n => <option key={n.id} value={n.id}>{n.label}</option>)}
           </select>
         </div>
+
+        {!hasApplication && (
+          <div className="glass-card-strong rounded-2xl p-4 flex items-center gap-3 mb-5" style={{ background: 'linear-gradient(135deg,#FFF3EE,#FFD6C9)' }}>
+            <span className="text-2xl">📝</span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-[#242424]">No provider application on file for this account</p>
+              <p className="text-xs text-[#6E6E73]">The screens below are demo data (Jordan's Care Services). Register a real application to appear in MomMind's real marketplace/Find Care.</p>
+            </div>
+            <button onClick={() => setView('choose-type')} className="action-btn flex-shrink-0 text-xs font-bold text-white px-3 py-2 rounded-lg" style={{ background: 'linear-gradient(135deg,#EE674E,#F47B66)' }}>Register →</button>
+          </div>
+        )}
 
         {nav === 'overview' && (
           <div className="space-y-5">
