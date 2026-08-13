@@ -36,18 +36,23 @@ body {
   font-family: 'DM Serif Display', Georgia, serif;
 }
 
+/* backdrop-filter: blur(...) written as a plain property here was being
+   silently dropped by the production build (Tailwind v4's Lightning-CSS
+   minifier) -- verified by grepping the built dist/*.css, it never made
+   it out. Using Tailwind's own backdrop-blur-* utility via @apply routes
+   it through the same pipeline that generates Tailwind's utilities, so
+   it survives minification instead of being treated as a strippable
+   author declaration. */
 .glass-card {
+  @apply backdrop-blur-xl;
   background: rgba(255, 252, 250, 0.82);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
   border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow: 0 4px 24px rgba(238, 103, 78, 0.08), 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .glass-card-strong {
+  @apply backdrop-blur-2xl;
   background: rgba(255, 248, 244, 0.88);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
   border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow: 0 8px 32px rgba(238, 103, 78, 0.12), 0 2px 8px rgba(0,0,0,0.06);
 }
