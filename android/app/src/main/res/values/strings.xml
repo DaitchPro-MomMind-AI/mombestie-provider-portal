@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MomBestie Provider</string>
+    <string name="title_activity_main">MomBestie Provider</string>
+    <string name="package_name">app.mombestie.provider</string>
+    <string name="custom_url_scheme">app.mombestie.provider</string>
+</resources>
