@@ -1,6 +1,6 @@
 /**
  * Real per-country provider registration fee -- country_config
- * (mommind-backend). Replaces the previous hardcoded APPLICATION_FEE=$25
+ * (mombestie-backend). Replaces the previous hardcoded APPLICATION_FEE=$25
  * constant, which only ever reflected the US reference number. Per the
  * payment architecture spec: "The actual amount must be configurable
  * independently for every country."

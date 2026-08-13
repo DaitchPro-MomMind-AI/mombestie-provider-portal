@@ -7,7 +7,7 @@ export interface AuthResult {
 }
 
 /**
- * Same real-auth pattern as mommind-customer-app/src/services/authService.ts
+ * Same real-auth pattern as mombestie-customer-app/src/services/authService.ts
  * -- no household/customer concept here, just a plain Supabase account. The
  * resulting user id is what healthcareProviderService/providerService key
  * every application row to (`healthcare_providers.user_id` /

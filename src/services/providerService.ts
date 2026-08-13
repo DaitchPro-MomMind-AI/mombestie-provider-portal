@@ -1,6 +1,6 @@
 /**
  * Real Supabase-backed family-service provider applications --
- * `providers` table (mommind-backend migration
+ * `providers` table (mombestie-backend migration
  * 20260812000005_providers_bookings_payments.sql). Same real-write pattern
  * as healthcareProviderService.ts, applied to the pre-existing onboarding
  * wizard so both provider classes are equally real, not one real and one a

@@ -240,7 +240,7 @@ function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingD
                   <>
                     <div className="p-3 rounded-xl mb-3" style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
                       <p className="text-sm font-semibold text-[#242424]">{feeLabel}</p>
-                      <p className="text-[11px] text-[#6E6E73]">No monthly fee, ever. Set per-country by MomMind admin — see Marketing site.</p>
+                      <p className="text-[11px] text-[#6E6E73]">No monthly fee, ever. Set per-country by MomBestie admin — see Marketing site.</p>
                     </div>
                     {c && (
                       <PaymentMethodPicker countryCode={c.country_code} currency={c.currency} transactionType="provider_registration_fee"
@@ -431,7 +431,7 @@ export default function App() {
             <span className="text-2xl">📝</span>
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#242424]">No provider application on file for this account</p>
-              <p className="text-xs text-[#6E6E73]">The screens below are demo data (Jordan's Care Services). Register a real application to appear in MomMind's real marketplace/Find Care.</p>
+              <p className="text-xs text-[#6E6E73]">The screens below are demo data (Jordan's Care Services). Register a real application to appear in MomBestie's real marketplace/Find Care.</p>
             </div>
             <button onClick={() => setView('choose-type')} className="action-btn flex-shrink-0 text-xs font-bold text-white px-3 py-2 rounded-lg" style={{ background: 'linear-gradient(135deg,#EE674E,#F47B66)' }}>Register →</button>
           </div>

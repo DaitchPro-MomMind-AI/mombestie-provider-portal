@@ -129,7 +129,7 @@ export function HealthcareWizard({ userId, onSubmitted, onCancel }: { userId: st
             </div>
             <input value={data.licenseNumber} onChange={e => update({ licenseNumber: e.target.value })} placeholder="License number" className="cartoon-input w-full px-4 py-3 text-sm" />
             <input value={data.licenseJurisdiction} onChange={e => update({ licenseJurisdiction: e.target.value })} placeholder="License jurisdiction (e.g. State of California)" className="cartoon-input w-full px-4 py-3 text-sm" />
-            <p className="text-[11px] text-[#6E6E73]">License status starts as "unverified" — MomMind staff confirm it directly with the issuing board before approval. You can never self-mark your own license verified.</p>
+            <p className="text-[11px] text-[#6E6E73]">License status starts as "unverified" — MomBestie staff confirm it directly with the issuing board before approval. You can never self-mark your own license verified.</p>
           </>)}
 
           {step === 3 && (<>
@@ -164,7 +164,7 @@ export function HealthcareWizard({ userId, onSubmitted, onCancel }: { userId: st
             {[
               { key: 'credentialDocumentsUploaded' as const, label: 'Professional license / credential documents' },
               { key: 'backgroundCheckConsent' as const, label: 'Consent to background & credential verification' },
-              { key: 'agreementsAccepted' as const, label: 'MomMind Healthcare Provider Agreement' },
+              { key: 'agreementsAccepted' as const, label: 'MomBestie Healthcare Provider Agreement' },
             ].map(doc => (
               <button key={doc.key} onClick={() => update(d => ({ [doc.key]: !d[doc.key] }))} className="action-btn w-full flex items-center gap-3 p-3 rounded-xl text-left" style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
                 <div className={`w-5 h-5 rounded-md flex items-center justify-center text-xs flex-shrink-0 ${data[doc.key] ? 'bg-[#55A67A] text-white' : 'bg-[#F0E8E4]'}`}>{data[doc.key] ? '✓' : ''}</div>

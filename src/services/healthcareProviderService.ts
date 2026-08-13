@@ -1,6 +1,6 @@
 /**
  * Real Supabase-backed healthcare provider applications --
- * `healthcare_providers` table (mommind-backend migration
+ * `healthcare_providers` table (mombestie-backend migration
  * 20260812000009), a deliberately separate table/state-machine from
  * `providers` -- see docs/ARCHITECTURE.md §14.4/§14.8. RLS lets the owner
  * insert/read/update their own draft or rejected application, and only

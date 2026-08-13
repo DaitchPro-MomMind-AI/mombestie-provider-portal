@@ -6,7 +6,7 @@ type Mode = 'signin' | 'signup' | 'confirm-email'
 /**
  * Real Supabase auth gate -- replaces the old LoginGate, which accepted any
  * input and moved straight to the dashboard. Same signup -> confirm-email ->
- * sign-in flow as mommind-customer-app's LoginScreen, verified against the
+ * sign-in flow as mombestie-customer-app's LoginScreen, verified against the
  * real project during that work; reused here rather than reinvented.
  */
 export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
@@ -52,7 +52,7 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
       <div className="w-full max-w-sm glass-card-strong rounded-3xl p-8">
         <div className="w-12 h-12 rounded-2xl coral-gradient flex items-center justify-center text-white font-display text-xl mb-4">M</div>
         <h1 className="font-display text-2xl text-[#242424] mb-1">Provider Portal</h1>
-        <p className="text-sm text-[#6E6E73] mb-6">{mode === 'signup' ? 'Create your provider account.' : 'Sign in to manage your MomMind services.'}</p>
+        <p className="text-sm text-[#6E6E73] mb-6">{mode === 'signup' ? 'Create your provider account.' : 'Sign in to manage your MomBestie services.'}</p>
 
         {error && (
           <div className="rounded-xl px-3.5 py-2.5 mb-3 text-xs text-[#D9534F]" style={{ background: '#FAECEC', border: '1px solid #ECA0A0' }}>{error}</div>

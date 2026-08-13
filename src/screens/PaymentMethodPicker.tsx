@@ -30,7 +30,7 @@ export function PaymentMethodPicker({ countryCode, currency, transactionType, am
     return (
       <div className="rounded-xl p-3.5" style={{ background: '#FFF3EE', border: '1.5px dashed #F6B6A5' }}>
         <p className="text-sm font-semibold text-[#242424]">No payment methods are available yet for {countryCode}</p>
-        <p className="text-xs text-[#6E6E73] mt-1">MomMind hasn't connected a real payment processor for this country/transaction type yet. This isn't a bug — a payment method only appears once it's actually integrated, configured, and turned on by an admin.</p>
+        <p className="text-xs text-[#6E6E73] mt-1">MomBestie hasn't connected a real payment processor for this country/transaction type yet. This isn't a bug — a payment method only appears once it's actually integrated, configured, and turned on by an admin.</p>
       </div>
     )
   }

@@ -1,6 +1,6 @@
 /**
  * Client for the centralized payment eligibility engine --
- * `get_eligible_payment_methods()` (mommind-backend migration
+ * `get_eligible_payment_methods()` (mombestie-backend migration
  * 20260813000004). This is the ONLY sanctioned way to learn which payment
  * methods to show; no screen should hardcode a provider or query
  * payment_method_configs directly (docs/ARCHITECTURE.md §15).
