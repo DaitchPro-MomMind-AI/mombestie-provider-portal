@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { getCurrentUser, signOut, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication } from './services'
+import { getCurrentUser, signOut, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication, listCountries, type CountryFee } from './services'
 import { AuthGate } from './screens/AuthGate'
 import { ProviderTypeChoice } from './screens/ProviderTypeChoice'
 import { HealthcareWizard } from './screens/HealthcareWizard'
 import { PendingStatusScreen } from './screens/PendingStatusScreen'
+import { PaymentMethodPicker } from './screens/PaymentMethodPicker'
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
 // Everything here is a frontend fixture, same status as the customer app's
@@ -39,7 +40,6 @@ const NAV = [
 type NavId = typeof NAV[number]['id']
 
 const COMMISSION_PCT = 10 // reference value — real commission is server-side, per country (see ARCHITECTURE.md §9)
-const APPLICATION_FEE = 25 // reference value — country-configurable, see ARCHITECTURE.md §9/§7.2
 
 // Onboarding pipeline per the master spec §11: registration -> identity ->
 // category -> service info -> experience -> service area -> pricing ->
@@ -59,6 +59,7 @@ interface OnboardingData {
   businessName: string
   description: string
   experienceYears: string
+  country: string
   serviceCity: string
   serviceRadius: string
   hourlyRate: string
@@ -67,15 +68,16 @@ interface OnboardingData {
   backgroundCheckConsent: boolean
   certifications: boolean
   feePaid: boolean
+  feePaymentMethod: string | null
   payoutConnected: boolean
 }
 
 const EMPTY_ONBOARDING: OnboardingData = {
   fullName: '', email: '', phone: '', address: '',
   categories: [], businessName: '', description: '', experienceYears: '',
-  serviceCity: '', serviceRadius: '10', hourlyRate: '',
+  country: 'US', serviceCity: '', serviceRadius: '10', hourlyRate: '',
   availability: [], idUploaded: false, backgroundCheckConsent: false, certifications: false,
-  feePaid: false, payoutConnected: false,
+  feePaid: false, feePaymentMethod: null, payoutConnected: false,
 }
 
 const ONBOARDING_STEPS = ['Account', 'Identity', 'Category', 'Service Details', 'Area & Pricing', 'Availability', 'Documents & Fee', 'Payout'] as const
@@ -83,6 +85,8 @@ const ONBOARDING_STEPS = ['Account', 'Identity', 'Category', 'Service Details', 
 function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingData) => void; onCancel: () => void }) {
   const [step, setStep] = useState(1)
   const [data, setData] = useState<OnboardingData>(EMPTY_ONBOARDING)
+  const [countries, setCountries] = useState<CountryFee[]>([])
+  useEffect(() => { listCountries().then(setCountries) }, [])
   const totalSteps = ONBOARDING_STEPS.length
 
   // Functional form throughout — reading `data.x` directly from the render
@@ -168,6 +172,21 @@ function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingD
           </>)}
 
           {step === 5 && (<>
+            <div>
+              <p className="text-xs font-semibold text-[#6E6E73] uppercase tracking-wide mb-1.5">Country</p>
+              <div className="grid grid-cols-2 gap-2">
+                {countries.map(c => (
+                  <button key={c.country_code} onClick={() => update({ country: c.country_code })}
+                    className="action-btn py-2.5 px-3 rounded-xl text-xs font-semibold text-left"
+                    style={data.country === c.country_code
+                      ? { background: '#FFD6C9', border: '2px solid #EE674E', color: '#C94930' }
+                      : { background: '#FFF8F4', border: '2px solid #F0E8E4', color: '#6E6E73' }}>
+                    {data.country === c.country_code ? '✓ ' : ''}{c.country_name}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-[#6E6E73] mt-1.5">Determines your registration fee amount and eligible payment methods — every country uses the same architecture, not a special case.</p>
+            </div>
             <input value={data.serviceCity} onChange={e => update({ serviceCity: e.target.value })} placeholder="City / service area" className="cartoon-input w-full px-4 py-3 text-sm" />
             <div>
               <label className="text-xs text-[#6E6E73] mb-1 block">Service radius: {data.serviceRadius} mi</label>
@@ -214,17 +233,25 @@ function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingD
             ))}
             <div className="pt-2 border-t border-[#F0E8E4] mt-2">
               <p className="text-xs font-semibold text-[#6E6E73] uppercase tracking-wide mb-2">Application fee</p>
-              <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
-                <div>
-                  <p className="text-sm font-semibold text-[#242424]">${APPLICATION_FEE} one-time</p>
-                  <p className="text-[11px] text-[#6E6E73]">No monthly fee, ever — see Marketing site.</p>
-                </div>
-                <button onClick={() => update(d => ({ feePaid: !d.feePaid }))}
-                  className={`action-btn text-xs font-semibold px-3 py-2 rounded-lg ${data.feePaid ? 'bg-[#E8F5EE] text-[#55A67A]' : 'coral-gradient text-white'}`}>
-                  {data.feePaid ? '✓ Paid (demo)' : 'Pay (demo)'}
-                </button>
-              </div>
-              <p className="text-[11px] text-[#6E6E73] mt-1.5">No real charge — no payment processor is connected in this environment. See docs/ARCHITECTURE.md §9.</p>
+              {(() => {
+                const c = countries.find(x => x.country_code === data.country)
+                const feeLabel = c ? `${c.currency_symbol}${(c.provider_application_fee_cents / 100).toLocaleString()} one-time` : 'Loading…'
+                return (
+                  <>
+                    <div className="p-3 rounded-xl mb-3" style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
+                      <p className="text-sm font-semibold text-[#242424]">{feeLabel}</p>
+                      <p className="text-[11px] text-[#6E6E73]">No monthly fee, ever. Set per-country by MomMind admin — see Marketing site.</p>
+                    </div>
+                    {c && (
+                      <PaymentMethodPicker countryCode={c.country_code} currency={c.currency} transactionType="provider_registration_fee"
+                        amountCents={c.provider_application_fee_cents}
+                        selected={data.feePaymentMethod}
+                        onSelect={pm => update({ feePaymentMethod: pm, feePaid: true })} />
+                    )}
+                  </>
+                )
+              })()}
+              <p className="text-[11px] text-[#6E6E73] mt-2">Payment methods shown are only ones actually eligible for your country and this transaction type — nothing is hardcoded (docs/ARCHITECTURE.md §15).</p>
             </div>
           </>)}
 
@@ -355,7 +382,7 @@ export default function App() {
           experience_years: d.experienceYears ? parseInt(d.experienceYears, 10) : null,
           service_city: d.serviceCity || null, service_radius_mi: parseInt(d.serviceRadius, 10) || 10,
           hourly_rate_cents: d.hourlyRate ? Math.round(parseFloat(d.hourlyRate) * 100) : null,
-          country: 'US', availability_days: d.availability,
+          country: d.country, availability_days: d.availability,
           id_uploaded: d.idUploaded, background_check_consent: d.backgroundCheckConsent,
           certifications: d.certifications, application_fee_paid: d.feePaid, payout_connected: d.payoutConnected,
         })
