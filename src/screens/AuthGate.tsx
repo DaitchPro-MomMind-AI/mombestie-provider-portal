@@ -36,7 +36,7 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
 
   if (mode === 'confirm-email') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFFCFA] px-4">
+      <div className="h-full w-full overflow-y-auto flex items-center justify-center bg-[#FFFCFA] px-4">
         <div className="w-full max-w-sm glass-card-strong rounded-3xl p-8 text-center">
           <div className="w-14 h-14 rounded-full bg-[#FEF3CD] flex items-center justify-center text-2xl mx-auto mb-4">📧</div>
           <h1 className="font-display text-xl text-[#242424] mb-2">Confirm your email</h1>
@@ -48,7 +48,7 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FFFCFA] px-4">
+    <div className="h-full w-full overflow-y-auto flex items-center justify-center bg-[#FFFCFA] px-4">
       <div className="w-full max-w-sm glass-card-strong rounded-3xl p-8">
         <div className="w-12 h-12 rounded-2xl coral-gradient flex items-center justify-center text-white font-display text-xl mb-4">M</div>
         <h1 className="font-display text-2xl text-[#242424] mb-1">Provider Portal</h1>

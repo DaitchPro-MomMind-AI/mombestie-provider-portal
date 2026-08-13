@@ -79,7 +79,7 @@ export function HealthcareWizard({ userId, onSubmitted, onCancel }: { userId: st
   const back = () => step > 1 ? setStep(step - 1) : onCancel()
 
   return (
-    <div className="min-h-screen bg-[#FFFCFA] px-4 py-8 flex items-start justify-center">
+    <div className="h-full w-full overflow-y-auto bg-[#FFFCFA] px-4 py-8 flex items-start justify-center">
       <div className="w-full max-w-lg">
         <div className="flex items-center gap-1 mb-6">
           {STEPS.map((label, i) => {

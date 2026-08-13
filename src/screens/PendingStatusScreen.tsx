@@ -38,7 +38,7 @@ export function PendingStatusScreen({ userId, kind, onBackToLogin }: { userId: s
   const copy = status ? STATUS_COPY[status] ?? { icon: '·', label: status, color: '#6E6E73' } : null
 
   return (
-    <div className="min-h-screen bg-[#FFFCFA] flex items-center justify-center px-4">
+    <div className="h-full w-full overflow-y-auto bg-[#FFFCFA] flex items-center justify-center px-4">
       <div className="w-full max-w-sm glass-card-strong rounded-3xl p-8 text-center">
         {loading ? (
           <span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" />

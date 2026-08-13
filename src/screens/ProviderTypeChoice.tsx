@@ -7,7 +7,7 @@
  */
 export function ProviderTypeChoice({ onChoose, onCancel }: { onChoose: (kind: 'family' | 'healthcare') => void; onCancel: () => void }) {
   return (
-    <div className="min-h-screen bg-[#FFFCFA] px-4 py-8 flex items-center justify-center">
+    <div className="h-full w-full overflow-y-auto bg-[#FFFCFA] px-4 py-8 flex items-center justify-center">
       <div className="w-full max-w-lg">
         <p className="text-xs font-semibold text-[#EE674E] uppercase tracking-wide mb-1">Provider Registration</p>
         <h1 className="font-display text-2xl text-[#242424] mb-1">What kind of provider are you?</h1>

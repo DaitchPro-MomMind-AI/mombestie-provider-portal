@@ -27,17 +27,24 @@ const VERIFICATION_STEPS = [
   { label: 'Admin review', done: false },
 ]
 
-const NAV = [
+// Native app IA: 4 primary tabs live in the bottom bar (the ones a provider
+// checks constantly), everything lower-frequency (Availability, Profile,
+// Verification, Settings) lives one tap deeper behind "More" -- an 8-item
+// bottom bar is a desktop-sidebar habit, not a phone-app one.
+const PRIMARY_NAV = [
   { id: 'overview', label: 'Overview', icon: '🏠' },
   { id: 'bookings', label: 'Bookings', icon: '📋' },
+  { id: 'earnings', label: 'Earnings', icon: '💰' },
+  { id: 'messages', label: 'Messages', icon: '💬' },
+] as const
+const MORE_NAV = [
   { id: 'availability', label: 'Availability', icon: '📅' },
   { id: 'profile', label: 'Profile', icon: '👤' },
-  { id: 'earnings', label: 'Earnings & Payouts', icon: '💰' },
-  { id: 'messages', label: 'Messages', icon: '💬' },
   { id: 'verification', label: 'Verification', icon: '✅' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ] as const
-type NavId = typeof NAV[number]['id']
+const NAV = [...PRIMARY_NAV, ...MORE_NAV] as const
+type NavId = typeof NAV[number]['id'] | 'more'
 
 const COMMISSION_PCT = 10 // reference value — real commission is server-side, per country (see ARCHITECTURE.md §9)
 
@@ -117,7 +124,7 @@ function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingD
   const back = () => step > 1 ? setStep(step - 1) : onCancel()
 
   return (
-    <div className="min-h-screen bg-[#FFFCFA] px-4 py-8 flex items-start justify-center">
+    <div className="h-full w-full overflow-y-auto bg-[#FFFCFA] px-4 py-8 flex items-start justify-center">
       <div className="w-full max-w-lg">
         {/* Step indicator */}
         <div className="flex items-center gap-1 mb-6">
@@ -292,30 +299,97 @@ function StatusPill({ status }: { status: BookingStatus }) {
   return <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${styles[status]}`}>{status}</span>
 }
 
-function Sidebar({ active, onChange, onSignOut }: { active: NavId; onChange: (id: NavId) => void; onSignOut: () => void }) {
+// Same phone-frame pattern as the customer app (src/App.tsx): full-bleed on
+// an actual phone, a scaled/centered phone mockup everywhere else -- so a
+// desktop browser preview looks like a real native screen, not a website.
+// Providers work from their phones (see docs/ARCHITECTURE.md native-app
+// section, 2026-08-13) so this app is native-first the same way the
+// customer app is, not a "responsive dashboard that also fits on mobile."
+function PhoneShell({ children }: { children: React.ReactNode }) {
+  const [vw, setVw] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+  const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 844)
+  useEffect(() => {
+    const onResize = () => { setVw(window.innerWidth); setVh(window.innerHeight) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const isMobile = vw < 640
+  const frameW = 390
+  const frameH = 844
+  const scale = isMobile ? 1 : Math.min(1, (vw * 0.9) / frameW, (vh * 0.95) / frameH)
+  const borderRad = isMobile ? 0 : 44
+
   return (
-    <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-[#F6EDE8] bg-white p-4">
-      <div className="flex items-center gap-2 px-2 mb-6">
-        <div className="w-8 h-8 rounded-xl coral-gradient flex items-center justify-center text-white font-display">M</div>
-        <span className="font-display text-[#242424]">Provider Portal</span>
+    <div className="flex items-center justify-center overflow-hidden" style={{
+      minHeight: '100dvh',
+      background: isMobile ? '#FFFCFA' : 'radial-gradient(ellipse at 20% 30%, #FFE8DE 0%, #FFF8F4 45%, #EEF4FF 100%)',
+    }}>
+      {!isMobile && (
+        <>
+          <div style={{ position: 'fixed', width: 500, height: 500, borderRadius: '50%', background: 'rgba(246,182,165,0.22)', filter: 'blur(80px)', top: '-100px', left: '-120px', pointerEvents: 'none' }} />
+          <div style={{ position: 'fixed', width: 400, height: 400, borderRadius: '50%', background: 'rgba(98,153,213,0.13)', filter: 'blur(70px)', bottom: '-80px', right: '-100px', pointerEvents: 'none' }} />
+        </>
+      )}
+      <div className="relative flex flex-col overflow-hidden" style={{
+        width: isMobile ? '100%' : frameW,
+        height: isMobile ? '100dvh' : frameH,
+        maxWidth: isMobile ? '100%' : frameW,
+        borderRadius: borderRad,
+        background: '#FFFCFA',
+        transform: isMobile ? 'none' : `scale(${scale})`,
+        transformOrigin: 'center center',
+        boxShadow: isMobile ? 'none' : '0 32px 80px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.10)',
+        flexShrink: 0,
+      }}>
+        {/* Status bar -- purely visual, same mockup pattern as the customer
+            app, so a desktop preview reads as a phone screenshot. */}
+        <div className="flex items-center justify-between px-6 pt-4 pb-1 flex-shrink-0">
+          <span className="text-xs font-semibold text-[#242424]">9:41</span>
+          <div className="flex items-center gap-1.5">
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <rect x="0" y="6" width="3" height="6" rx="0.5" fill="#242424" />
+              <rect x="4.5" y="4" width="3" height="8" rx="0.5" fill="#242424" />
+              <rect x="9" y="2" width="3" height="10" rx="0.5" fill="#242424" />
+              <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" fill="#242424" />
+            </svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M8 2.5C10.5 2.5 12.8 3.6 14.3 5.4L15.5 4.1C13.7 2 11 .8 8 .8s-5.7 1.2-7.5 3.3L1.7 5.4C3.2 3.6 5.5 2.5 8 2.5z" fill="#242424" />
+              <path d="M8 5.5c1.6 0 3 .7 4 1.8l1.2-1.3C11.7 4.6 10 3.8 8 3.8S4.3 4.6 2.8 6L4 7.3C5 6.2 6.4 5.5 8 5.5z" fill="#242424" />
+              <circle cx="8" cy="10.5" r="1.5" fill="#242424" />
+            </svg>
+            <div className="w-5.5 h-3 rounded-sm border border-[#242424]/40 p-0.5 flex">
+              <div className="w-3/4 h-full rounded-xs bg-[#55A67A]" />
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col overflow-hidden">{children}</div>
       </div>
-      <nav className="space-y-1 flex-1">
-        {NAV.map(n => (
-          <button key={n.id} onClick={() => onChange(n.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors ${active === n.id ? 'bg-[#FFD6C9] text-[#C94930] font-semibold' : 'text-[#6E6E73] hover:bg-[#FFF3EE]'}`}>
-            <span>{n.icon}</span>{n.label}
-          </button>
-        ))}
-      </nav>
-      <button onClick={onSignOut} className="w-full text-left px-3 py-2.5 text-sm font-semibold text-[#D9534F]">🚪 Sign Out</button>
-    </aside>
+    </div>
   )
 }
 
-function Card({ title, children }: { title?: string; children: React.ReactNode }) {
+function ProviderBottomNav({ active, onChange }: { active: NavId; onChange: (id: NavId) => void }) {
+  const moreActive = active === 'more' || MORE_NAV.some(n => n.id === active)
   return (
-    <div className="glass-card rounded-2xl p-5">
-      {title && <p className="text-xs font-semibold text-[#6E6E73] uppercase tracking-wide mb-3">{title}</p>}
+    <div className="glass-card-strong border-t border-white/60 px-1 pt-2 pb-5 flex items-center flex-shrink-0">
+      {PRIMARY_NAV.map(n => (
+        <button key={n.id} onClick={() => onChange(n.id)} className="flex-1 flex flex-col items-center gap-0.5 py-1">
+          <span className="text-lg">{n.icon}</span>
+          <span className={`text-[10px] font-medium ${active === n.id ? 'text-[#EE674E]' : 'text-[#B0A8A4]'}`}>{n.label}</span>
+        </button>
+      ))}
+      <button onClick={() => onChange('more')} className="flex-1 flex flex-col items-center gap-0.5 py-1">
+        <span className="text-lg">☰</span>
+        <span className={`text-[10px] font-medium ${moreActive ? 'text-[#EE674E]' : 'text-[#B0A8A4]'}`}>More</span>
+      </button>
+    </div>
+  )
+}
+
+function Card({ title, compact, children }: { title?: string; compact?: boolean; children: React.ReactNode }) {
+  return (
+    <div className={`glass-card rounded-2xl ${compact ? 'p-3' : 'p-5'}`}>
+      {title && <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wide mb-2 leading-tight">{title}</p>}
       {children}
     </div>
   )
@@ -358,21 +432,21 @@ export default function App() {
   }
 
   if (view === 'loading') {
-    return <div className="min-h-screen flex items-center justify-center bg-[#FFFCFA]"><span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" /></div>
+    return <PhoneShell><div className="h-full flex items-center justify-center bg-[#FFFCFA]"><span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" /></div></PhoneShell>
   }
 
   if (view === 'auth') {
-    return <AuthGate onSignedIn={async () => { const user = await getCurrentUser(); if (user) await routeAfterAuth(user.id) }} />
+    return <PhoneShell><AuthGate onSignedIn={async () => { const user = await getCurrentUser(); if (user) await routeAfterAuth(user.id) }} /></PhoneShell>
   }
 
   if (view === 'choose-type') {
-    return <ProviderTypeChoice
+    return <PhoneShell><ProviderTypeChoice
       onChoose={k => setView(k === 'family' ? 'onboarding-family' : 'onboarding-healthcare')}
-      onCancel={() => setView(hasApplication ? 'dashboard' : 'auth')} />
+      onCancel={() => setView(hasApplication ? 'dashboard' : 'auth')} /></PhoneShell>
   }
 
   if (view === 'onboarding-family') {
-    return <OnboardingWizard
+    return <PhoneShell><OnboardingWizard
       onSubmit={async d => {
         if (!userId) { setView('auth'); return }
         await submitProviderApplication({
@@ -388,17 +462,17 @@ export default function App() {
         })
         setPendingKind('family'); setHasApplication(true); setView('pending')
       }}
-      onCancel={() => setView('choose-type')} />
+      onCancel={() => setView('choose-type')} /></PhoneShell>
   }
 
   if (view === 'onboarding-healthcare') {
-    return <HealthcareWizard userId={userId!}
+    return <PhoneShell><HealthcareWizard userId={userId!}
       onSubmitted={() => { setPendingKind('healthcare'); setHasApplication(true); setView('pending') }}
-      onCancel={() => setView('choose-type')} />
+      onCancel={() => setView('choose-type')} /></PhoneShell>
   }
 
   if (view === 'pending') {
-    return <PendingStatusScreen userId={userId!} kind={pendingKind} onBackToLogin={handleSignOut} />
+    return <PhoneShell><PendingStatusScreen userId={userId!} kind={pendingKind} onBackToLogin={handleSignOut} /></PhoneShell>
   }
 
   // Accept moves Requested -> Confirmed (a real commitment to show up);
@@ -412,20 +486,22 @@ export default function App() {
   const totalEarned = bookings.filter(b => b.status === 'Completed').reduce((s, b) => s + b.amount, 0)
   const commission = Math.round(totalEarned * (COMMISSION_PCT / 100) * 100) / 100
 
-  return (
-    <div className="min-h-screen flex bg-[#FFFCFA]">
-      <Sidebar active={nav} onChange={setNav} onSignOut={handleSignOut} />
-      <main className="flex-1 min-w-0 px-6 py-6 max-w-4xl">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="font-display text-2xl text-[#242424] capitalize">{NAV.find(n => n.id === nav)?.label}</h1>
-            <p className="text-sm text-[#6E6E73]">Jordan's Care Services · San Francisco, CA</p>
-          </div>
-          <select className="md:hidden text-sm border border-[#F0E8E4] rounded-lg px-2 py-1.5" value={nav} onChange={e => setNav(e.target.value as NavId)}>
-            {NAV.map(n => <option key={n.id} value={n.id}>{n.label}</option>)}
-          </select>
-        </div>
+  const isMoreItem = MORE_NAV.some(n => n.id === nav)
+  const currentLabel = nav === 'more' ? 'More' : NAV.find(n => n.id === nav)?.label
 
+  return (
+    <PhoneShell>
+      <div className="flex items-center gap-2 px-5 pt-2 pb-3 flex-shrink-0">
+        {isMoreItem && (
+          <button onClick={() => setNav('more')} className="text-lg text-[#6E6E73] -ml-1 px-1">←</button>
+        )}
+        <div className="flex-1 min-w-0">
+          <h1 className="font-display text-xl text-[#242424] capitalize truncate">{currentLabel}</h1>
+          <p className="text-xs text-[#6E6E73] truncate">Jordan's Care Services · San Francisco, CA</p>
+        </div>
+      </div>
+
+      <main className="flex-1 min-h-0 overflow-y-auto px-5 pb-5">
         {!hasApplication && (
           <div className="glass-card-strong rounded-2xl p-4 flex items-center gap-3 mb-5" style={{ background: 'linear-gradient(135deg,#FFF3EE,#FFD6C9)' }}>
             <span className="text-2xl">📝</span>
@@ -439,10 +515,10 @@ export default function App() {
 
         {nav === 'overview' && (
           <div className="space-y-5">
-            <div className="grid sm:grid-cols-3 gap-4">
-              <Card title="Pending requests"><p className="font-display text-3xl text-[#242424]">{bookings.filter(b => b.status === 'Requested').length}</p></Card>
-              <Card title="Upcoming bookings"><p className="font-display text-3xl text-[#242424]">{bookings.filter(b => b.status === 'Confirmed').length}</p></Card>
-              <Card title="Rating"><p className="font-display text-3xl text-[#242424]">4.9 ★</p><p className="text-xs text-[#6E6E73] mt-1">32 reviews</p></Card>
+            <div className="grid grid-cols-3 gap-2">
+              <Card compact title="Pending"><p className="font-display text-2xl text-[#242424]">{bookings.filter(b => b.status === 'Requested').length}</p></Card>
+              <Card compact title="Upcoming"><p className="font-display text-2xl text-[#242424]">{bookings.filter(b => b.status === 'Confirmed').length}</p></Card>
+              <Card compact title="Rating"><p className="font-display text-2xl text-[#242424]">4.9★</p><p className="text-[10px] text-[#6E6E73]">32 reviews</p></Card>
             </div>
             <Card title="Recent activity">
               <div className="space-y-3">
@@ -499,9 +575,9 @@ export default function App() {
         {nav === 'profile' && (
           <div className="space-y-4">
             <Card title="Public profile">
-              <div className="grid sm:grid-cols-2 gap-3">
-                <input defaultValue="Jordan's Care Services" className="cartoon-input px-4 py-2.5 text-sm" placeholder="Business name" />
-                <input defaultValue="Babysitting, Postpartum Support" className="cartoon-input px-4 py-2.5 text-sm" placeholder="Categories" />
+              <div className="space-y-2.5">
+                <input defaultValue="Jordan's Care Services" className="cartoon-input w-full px-4 py-2.5 text-sm" placeholder="Business name" />
+                <input defaultValue="Babysitting, Postpartum Support" className="cartoon-input w-full px-4 py-2.5 text-sm" placeholder="Categories" />
               </div>
               <textarea defaultValue="8 years of childcare experience, CPR certified, background-checked." className="cartoon-input w-full px-4 py-2.5 text-sm mt-3" rows={3} />
               <button className="action-btn coral-gradient text-white text-sm font-semibold px-5 py-2.5 rounded-xl mt-3">Save Changes</button>
@@ -511,10 +587,10 @@ export default function App() {
 
         {nav === 'earnings' && (
           <div className="space-y-4">
-            <div className="grid sm:grid-cols-3 gap-4">
-              <Card title="Gross (completed)"><p className="font-display text-2xl text-[#242424]">${totalEarned.toFixed(2)}</p></Card>
-              <Card title={`Commission (${COMMISSION_PCT}%)`}><p className="font-display text-2xl text-[#242424]">-${commission.toFixed(2)}</p></Card>
-              <Card title="Net payout"><p className="font-display text-2xl text-[#55A67A]">${(totalEarned - commission).toFixed(2)}</p></Card>
+            <div className="grid grid-cols-3 gap-2">
+              <Card compact title="Gross"><p className="font-display text-lg text-[#242424]">${totalEarned.toFixed(2)}</p></Card>
+              <Card compact title={`Fee (${COMMISSION_PCT}%)`}><p className="font-display text-lg text-[#242424]">-${commission.toFixed(2)}</p></Card>
+              <Card compact title="Net"><p className="font-display text-lg text-[#55A67A]">${(totalEarned - commission).toFixed(2)}</p></Card>
             </div>
             <Card title="Payout method">
               <p className="text-sm text-[#6E6E73]">No payout method connected yet. Real payouts require a Stripe Connect (or equivalent) account — see docs/ARCHITECTURE.md §9.</p>
@@ -550,7 +626,27 @@ export default function App() {
             <p className="text-sm text-[#6E6E73]">Notification preferences, security, and account deactivation would live here.</p>
           </Card>
         )}
+
+        {nav === 'more' && (
+          <div className="space-y-2">
+            {MORE_NAV.map(n => (
+              <button key={n.id} onClick={() => setNav(n.id)}
+                className="action-btn w-full flex items-center gap-3 glass-card rounded-2xl px-4 py-3.5 text-left">
+                <span className="text-lg">{n.icon}</span>
+                <span className="flex-1 text-sm font-medium text-[#242424]">{n.label}</span>
+                <span className="text-[#B0A8A4]">›</span>
+              </button>
+            ))}
+            <button onClick={handleSignOut}
+              className="action-btn w-full flex items-center gap-3 glass-card rounded-2xl px-4 py-3.5 text-left mt-4">
+              <span className="text-lg">🚪</span>
+              <span className="flex-1 text-sm font-semibold text-[#D9534F]">Sign Out</span>
+            </button>
+          </div>
+        )}
       </main>
-    </div>
+
+      <ProviderBottomNav active={nav} onChange={setNav} />
+    </PhoneShell>
   )
 }
