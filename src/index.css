@@ -58,7 +58,11 @@ body {
 }
 
 .coral-gradient {
-  background: linear-gradient(135deg, #EE674E 0%, #F6A68E 100%);
+  /* Deepened 2026-08-13 per feedback on the Sign In button reading too
+     pale/washed-out -- was #EE674E -> #F6A68E (light end nearly peach).
+     Shared primary-button token for this app, so this deepens every
+     coral-gradient button consistently, not just Sign In. */
+  background: linear-gradient(135deg, #DE4527 0%, #EE674E 100%);
 }
 
 .peach-gradient {

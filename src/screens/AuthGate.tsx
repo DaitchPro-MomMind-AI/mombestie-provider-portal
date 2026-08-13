@@ -177,7 +177,7 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
 
           <button onClick={submit} disabled={submitting || !email.trim() || !password.trim() || (mode === 'signup' && !fullName.trim())}
             className="action-btn w-full coral-gradient text-white font-bold py-4 rounded-2xl mt-5 mb-3 text-[15px] disabled:opacity-40 flex items-center justify-center gap-1.5"
-            style={{ boxShadow: '0 8px 20px rgba(238,103,78,0.35)' }}>
+            style={{ boxShadow: '0 8px 20px rgba(222,69,39,0.4)' }}>
             {submitting ? 'Please wait…' : mode === 'signup' ? 'Create Account' : 'Sign In'}
             {!submitting && <span>→</span>}
           </button>
