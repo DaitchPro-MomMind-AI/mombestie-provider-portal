@@ -81,6 +81,18 @@ body {
   display: none;
 }
 
+/* A native app has no visible scrollbar -- every scrollable screen in
+   this app reaches for Tailwind's overflow-y-auto directly rather than
+   .scroll-area above, so hide it at that selector too instead of having
+   to touch every screen file individually. */
+.overflow-y-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.overflow-y-auto::-webkit-scrollbar {
+  display: none;
+}
+
 /* Colorful drifting blob background + glass-sheen, for AuthGate's
    parallax redesign (2026-08-13). Ported/extended from the customer
    app's .blob pattern -- adds blue/mint hues on top of coral/peach/gold
