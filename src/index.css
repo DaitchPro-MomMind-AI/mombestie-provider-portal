@@ -76,6 +76,60 @@ body {
   display: none;
 }
 
+/* Colorful drifting blob background + glass-sheen, for AuthGate's
+   parallax redesign (2026-08-13). Ported/extended from the customer
+   app's .blob pattern -- adds blue/mint hues on top of coral/peach/gold
+   so the login screen reads as more colorful, and the blobs give the
+   glass-card's backdrop-blur something real to diffuse. */
+.blob {
+  border-radius: 50%;
+  filter: blur(60px);
+  position: absolute;
+  pointer-events: none;
+}
+.blob-coral { background: rgba(238, 103, 78, 0.4); }
+.blob-peach { background: rgba(246, 182, 165, 0.42); }
+.blob-gold { background: rgba(248, 200, 94, 0.32); }
+.blob-blue { background: rgba(98, 153, 213, 0.32); }
+.blob-mint { background: rgba(85, 166, 122, 0.28); }
+.blob-lavender { background: rgba(167, 139, 214, 0.3); }
+
+@keyframes blobDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-20px, 15px) scale(1.05); }
+  66% { transform: translate(10px, -20px) scale(0.95); }
+}
+@keyframes blobDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(25px, -18px) scale(1.08); }
+}
+@keyframes blobDrift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(18px, 22px) scale(1.1); }
+  70% { transform: translate(-15px, -10px) scale(0.92); }
+}
+.drift-1 { animation: blobDrift1 9s ease-in-out infinite; }
+.drift-2 { animation: blobDrift2 11s ease-in-out infinite; }
+.drift-3 { animation: blobDrift3 13s ease-in-out infinite; }
+
+.glass-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(160deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 30%);
+  pointer-events: none;
+}
+
+@keyframes logoGlow {
+  0%, 100% { box-shadow: 0 8px 28px rgba(238,103,78,0.4), 0 0 0 8px rgba(238,103,78,0.08); }
+  50% { box-shadow: 0 10px 34px rgba(238,103,78,0.55), 0 0 0 12px rgba(238,103,78,0.12); }
+}
+.logo-glow { animation: logoGlow 3s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .blob, .logo-glow { animation: none !important; }
+}
+
 [data-dark="true"] {
   color-scheme: dark;
 }
