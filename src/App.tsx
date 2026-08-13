@@ -5,6 +5,7 @@ import { ProviderTypeChoice } from './screens/ProviderTypeChoice'
 import { HealthcareWizard } from './screens/HealthcareWizard'
 import { PendingStatusScreen } from './screens/PendingStatusScreen'
 import { PaymentMethodPicker } from './screens/PaymentMethodPicker'
+import { SettingsPanel } from './screens/SettingsPanel'
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
 // Everything here is a frontend fixture, same status as the customer app's
@@ -621,11 +622,7 @@ export default function App() {
           </Card>
         )}
 
-        {nav === 'settings' && (
-          <Card title="Account settings">
-            <p className="text-sm text-[#6E6E73]">Notification preferences, security, and account deactivation would live here.</p>
-          </Card>
-        )}
+        {nav === 'settings' && <SettingsPanel onSignOut={handleSignOut} />}
 
         {nav === 'more' && (
           <div className="space-y-2">

@@ -43,3 +43,23 @@ export async function getCurrentUser() {
   const { data } = await supabase.auth.getUser();
   return data.user;
 }
+
+/** Real Supabase password change -- used by the Settings screen. Requires
+ * the current session (no re-auth step here; Supabase itself still
+ * enforces the existing session's validity). */
+export async function updatePassword(newPassword: string): Promise<AuthResult> {
+  if (!supabase) return { ok: false, error: "Backend not configured." };
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/** Real Supabase email change -- Supabase sends a confirmation link to the
+ * *new* address before the change actually takes effect, same as the
+ * signup confirmation flow. */
+export async function updateEmail(newEmail: string): Promise<AuthResult> {
+  if (!supabase) return { ok: false, error: "Backend not configured." };
+  const { error } = await supabase.auth.updateUser({ email: newEmail });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, needsEmailConfirmation: true };
+}
