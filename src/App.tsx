@@ -1,12 +1,52 @@
 import { useEffect, useState } from 'react'
-import { getCurrentUser, signOut, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication, listCountries, type CountryFee, getEligiblePaymentMethods, type EligiblePaymentMethod } from './services'
-import { AuthGate } from './screens/AuthGate'
+import { getCurrentUser, signOut, signIn, signUp, requestPasswordReset, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication, listCountries, type CountryFee, getEligiblePaymentMethods, type EligiblePaymentMethod } from './services'
 import { ProviderTypeChoice } from './screens/ProviderTypeChoice'
 import { HealthcareWizard } from './screens/HealthcareWizard'
 import { PendingStatusScreen } from './screens/PendingStatusScreen'
 import { PaymentMethodPicker } from './screens/PaymentMethodPicker'
-import { SettingsPanel } from './screens/SettingsPanel'
-import { OverviewPanel } from './screens/OverviewPanel'
+
+// ─── v2 design (2026-08-14) ─────────────────────────────────────────────────
+// User-provided redesign (royal blue + white, see
+// docs/PROJECT_REPORT.md for the color/integration writeup), copied into
+// src/screens_v2/ and recolored from its original dark-navy build to match
+// the spec's own "white primary, navy as accent" direction. This is now
+// the primary UI -- the old AuthGate/OverviewPanel/SettingsPanel screens
+// (src/screens/) are kept on disk for reference but no longer rendered by
+// default. Only the auth flow (Splash/Welcome/SignIn/SignUp/
+// ForgotPassword/ConfirmEmail) and Dashboard are wired to real data this
+// pass; every other v2 screen (Bookings/AIHome/Messages/Earnings/
+// Settings/More/Calendar/Profile/Reviews/Notifications/SmartPricing/
+// MarketInsights/Healthcare/Support) still shows its own prototype
+// fixture data -- flagged, not hidden, same as every other honest gap in
+// this project.
+import Splash from './screens_v2/Splash'
+import Welcome from './screens_v2/Welcome'
+import SignIn from './screens_v2/SignIn'
+import SignUp from './screens_v2/SignUp'
+import ForgotPassword from './screens_v2/ForgotPassword'
+import ConfirmEmail from './screens_v2/ConfirmEmail'
+import Dashboard from './screens_v2/Dashboard'
+import Bookings from './screens_v2/Bookings'
+import AIHome from './screens_v2/AIHome'
+import Messages from './screens_v2/Messages'
+import Earnings from './screens_v2/Earnings'
+import SettingsV2 from './screens_v2/Settings'
+import MoreV2 from './screens_v2/More'
+import Calendar from './screens_v2/Calendar'
+import ProviderProfileV2 from './screens_v2/ProviderProfile'
+import Reviews from './screens_v2/Reviews'
+import Notifications from './screens_v2/Notifications'
+import SmartPricing from './screens_v2/SmartPricing'
+import MarketInsights from './screens_v2/MarketInsights'
+import HealthcareV2 from './screens_v2/Healthcare'
+import Support from './screens_v2/Support'
+
+export type Screen =
+  | 'splash' | 'welcome' | 'signin' | 'signup' | 'otp'
+  | 'country' | 'language' | 'providertype' | 'onboarding'
+  | 'dashboard' | 'bookings' | 'ai' | 'messages' | 'earnings' | 'settings'
+  | 'more' | 'forgotpassword' | 'calendar' | 'profile' | 'reviews'
+  | 'notifications' | 'smartpricing' | 'marketinsights' | 'healthcare' | 'support'
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
 // Everything here is a frontend fixture, same status as the customer app's
@@ -468,6 +508,15 @@ export default function App() {
   // an honest "no profile yet" state rather than a fake name.
   const [providerProfile, setProviderProfile] = useState<{ name: string; city: string | null; status: string; verified: boolean } | null>(null)
 
+  // v2 design screen navigation -- separate from the real `view` state
+  // machine above. `view` decides WHICH real flow you're in (auth vs.
+  // registration vs. dashboard); `v2Screen` decides which v2 screen
+  // renders within that flow (e.g. which of Splash/Welcome/SignIn/SignUp
+  // is showing while view === 'auth', or which of
+  // Dashboard/Bookings/AIHome/... while view === 'dashboard').
+  const [v2Screen, setV2Screen] = useState<Screen>('splash')
+  const [pendingSignupEmail, setPendingSignupEmail] = useState('')
+
   // Real dark mode -- device-level preference (not per-account), persisted
   // across sessions, same as most native apps. See index.css for the
   // [data-dark="true"] overrides this actually drives.
@@ -504,6 +553,7 @@ export default function App() {
     await signOut()
     setUserId(null)
     setHasApplication(false)
+    setV2Screen('welcome')
     setView('auth')
   }
 
@@ -512,7 +562,41 @@ export default function App() {
   }
 
   if (view === 'auth') {
-    return <PhoneShell dark={darkMode}><AuthGate onSignedIn={async () => { const user = await getCurrentUser(); if (user) await routeAfterAuth(user.id) }} /></PhoneShell>
+    const afterRealAuth = async () => {
+      const user = await getCurrentUser()
+      if (user) await routeAfterAuth(user.id)
+    }
+    return (
+      <PhoneShell dark={darkMode}>
+        {v2Screen === 'signin' ? (
+          <SignIn navigate={setV2Screen} onSignIn={async (email, password) => {
+            const res = await signIn(email, password)
+            if (!res.ok) return res.error ?? 'Something went wrong.'
+            await afterRealAuth()
+            return null
+          }} />
+        ) : v2Screen === 'signup' ? (
+          <SignUp navigate={setV2Screen} onSignUp={async (email, password, fullName) => {
+            const res = await signUp(email, password, fullName)
+            if (!res.ok) return { error: res.error ?? 'Something went wrong.', needsEmailConfirmation: false }
+            if (res.needsEmailConfirmation) { setPendingSignupEmail(email); return { error: null, needsEmailConfirmation: true } }
+            await afterRealAuth()
+            return { error: null, needsEmailConfirmation: false }
+          }} />
+        ) : v2Screen === 'otp' ? (
+          <ConfirmEmail navigate={setV2Screen} email={pendingSignupEmail} />
+        ) : v2Screen === 'forgotpassword' ? (
+          <ForgotPassword navigate={setV2Screen} onReset={async email => {
+            const res = await requestPasswordReset(email)
+            return res.ok ? null : (res.error ?? 'Something went wrong.')
+          }} />
+        ) : v2Screen === 'splash' ? (
+          <Splash navigate={setV2Screen} />
+        ) : (
+          <Welcome navigate={setV2Screen} />
+        )}
+      </PhoneShell>
+    )
   }
 
   if (view === 'choose-type') {
@@ -564,146 +648,34 @@ export default function App() {
 
   const isMoreItem = MORE_NAV.some(n => n.id === nav)
   const currentLabel = nav === 'more' ? 'More' : NAV.find(n => n.id === nav)?.label
+  void isMoreItem; void currentLabel; void decideBooking; void commission
+  // (old nav-based dashboard vars kept alive above only to avoid an
+  // unused-var build error while src/screens/OverviewPanel.tsx etc. still
+  // reference them on disk for later reference -- not otherwise used
+  // below now that the v2 Dashboard replaces this screen.)
+
+  const v2ProviderProfile = providerProfile
+    ? { name: providerProfile.name, city: providerProfile.city, verified: providerProfile.verified }
+    : null
 
   return (
     <PhoneShell dark={darkMode}>
-      <div className="flex items-center gap-2 px-5 pt-2 pb-3 flex-shrink-0">
-        {isMoreItem && (
-          <button onClick={() => setNav('more')} className="text-lg text-[#6E6E73] -ml-1 px-1">←</button>
-        )}
-        <div className="flex-1 min-w-0">
-          <h1 className="font-display text-xl text-[#242424] capitalize truncate">{currentLabel}</h1>
-          <p className="text-xs text-[#6E6E73] truncate">
-            {providerProfile ? `${providerProfile.name}${providerProfile.city ? ' · ' + providerProfile.city : ''}` : 'Complete your registration to get started'}
-          </p>
-        </div>
-      </div>
-
-      <main className="flex-1 min-h-0 overflow-y-auto px-5 pb-5">
-        {!hasApplication && (
-          <div className="glass-card-strong rounded-2xl p-4 flex items-center gap-3 mb-5" style={{ background: 'linear-gradient(135deg,#FFF3EE,#FFD6C9)' }}>
-            <span className="text-2xl">📝</span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-[#242424]">No provider application on file for this account</p>
-              <p className="text-xs text-[#6E6E73]">The screens below use placeholder booking data until your real application is approved. Register to appear in MomBestie's real marketplace/Find Care.</p>
-            </div>
-            <button onClick={() => setView('choose-type')} className="action-btn flex-shrink-0 text-xs font-bold text-white px-3 py-2 rounded-lg" style={{ background: 'linear-gradient(135deg,#EE674E,#F47B66)' }}>Register →</button>
-          </div>
-        )}
-
-        {nav === 'overview' && (
-          <OverviewPanel
-            providerProfile={providerProfile}
-            bookings={bookings}
-            totalEarned={totalEarned}
-            onNavigate={setNav}
-          />
-        )}
-
-        {nav === 'bookings' && (
-          <div className="space-y-3">
-            {bookings.map(b => (
-              <Card key={b.id}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-[#242424]">{b.service}</p>
-                    <p className="text-sm text-[#6E6E73]">{b.customer} · {b.when}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-display text-lg text-[#242424]">${b.amount}</p>
-                    <StatusPill status={b.status} />
-                  </div>
-                </div>
-                {b.status === 'Requested' && (
-                  <div className="flex gap-2 mt-4">
-                    <button onClick={() => decideBooking(b.id, 'Confirmed')} className="action-btn flex-1 coral-gradient text-white text-sm font-semibold py-2 rounded-xl">Accept</button>
-                    <button onClick={() => decideBooking(b.id, 'Declined')} className="action-btn flex-1 bg-[#F0E8E4] text-[#6E6E73] text-sm font-semibold py-2 rounded-xl">Decline</button>
-                  </div>
-                )}
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {nav === 'availability' && (
-          <Card title="Weekly availability">
-            <div className="grid grid-cols-7 gap-2 text-center">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => (
-                <div key={d} className={`rounded-xl py-4 text-sm font-medium ${i < 5 ? 'bg-[#FFD6C9] text-[#C94930]' : 'bg-[#F0E8E4] text-[#6E6E73]'}`}>{d}</div>
-              ))}
-            </div>
-            <p className="text-xs text-[#6E6E73] mt-3">Editing availability updates what customers can book — changes are never shown as available until saved.</p>
-          </Card>
-        )}
-
-        {nav === 'profile' && (
-          <div className="space-y-4">
-            <Card title="Public profile">
-              <div className="space-y-2.5">
-                <input defaultValue={providerProfile?.name ?? ''} className="cartoon-input w-full px-4 py-2.5 text-sm" placeholder="Business name" />
-                <input defaultValue="Babysitting, Postpartum Support" className="cartoon-input w-full px-4 py-2.5 text-sm" placeholder="Categories" />
-              </div>
-              <textarea defaultValue="8 years of childcare experience, CPR certified, background-checked." className="cartoon-input w-full px-4 py-2.5 text-sm mt-3" rows={3} />
-              <button className="action-btn coral-gradient text-white text-sm font-semibold px-5 py-2.5 rounded-xl mt-3">Save Changes</button>
-            </Card>
-          </div>
-        )}
-
-        {nav === 'earnings' && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
-              <Card compact title="Gross"><p className="font-display text-lg text-[#242424]">${totalEarned.toFixed(2)}</p></Card>
-              <Card compact title={`Fee (${COMMISSION_PCT}%)`}><p className="font-display text-lg text-[#242424]">-${commission.toFixed(2)}</p></Card>
-              <Card compact title="Net"><p className="font-display text-lg text-[#55A67A]">${(totalEarned - commission).toFixed(2)}</p></Card>
-            </div>
-            <PayoutMethodsCard countryCode={providerCountry} countries={countries} />
-          </div>
-        )}
-
-        {nav === 'messages' && (
-          <Card title="Conversations">
-            <p className="text-sm text-[#6E6E73]">No messages yet. Conversations open once a booking is requested.</p>
-          </Card>
-        )}
-
-        {nav === 'verification' && (
-          <Card title="Verification status">
-            <div className="space-y-3">
-              {VERIFICATION_STEPS.map(s => (
-                <div key={s.label} className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${s.done ? 'bg-[#E8F5EE] text-[#55A67A]' : 'bg-[#F0E8E4] text-[#6E6E73]'}`}>
-                    {s.done ? '✓' : '·'}
-                  </div>
-                  <p className={`text-sm ${s.done ? 'text-[#242424]' : 'text-[#6E6E73]'}`}>{s.label}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-[#6E6E73] mt-4">Verification badges are backend-controlled — this portal cannot self-assign a "Verified" status.</p>
-          </Card>
-        )}
-
-        {nav === 'settings' && <SettingsPanel onSignOut={handleSignOut} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)} providerName={providerProfile?.name ?? null} />}
-
-        {nav === 'more' && (
-          <div className="space-y-2">
-            {MORE_NAV.map(n => (
-              <button key={n.id} onClick={() => setNav(n.id)}
-                className="action-btn w-full flex items-center gap-3 glass-card rounded-2xl px-4 py-3.5 text-left">
-                <span className="text-lg">{n.icon}</span>
-                <span className="flex-1 text-sm font-medium text-[#242424]">{n.label}</span>
-                <span className="text-[#B0A8A4]">›</span>
-              </button>
-            ))}
-            <button onClick={handleSignOut}
-              className="action-btn w-full flex items-center gap-3 glass-card rounded-2xl px-4 py-3.5 text-left mt-4">
-              <span className="text-lg">🚪</span>
-              <span className="flex-1 text-sm font-semibold text-[#D9534F]">Sign Out</span>
-            </button>
-          </div>
-        )}
-      </main>
-
-      <ProviderBottomNav active={nav} onChange={setNav} />
+      {v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} />
+        : v2Screen === 'ai' ? <AIHome navigate={setV2Screen} />
+        : v2Screen === 'messages' ? <Messages navigate={setV2Screen} />
+        : v2Screen === 'earnings' ? <Earnings navigate={setV2Screen} />
+        : v2Screen === 'settings' ? <SettingsV2 navigate={setV2Screen} onSignOut={handleSignOut} />
+        : v2Screen === 'more' ? <MoreV2 navigate={setV2Screen} />
+        : v2Screen === 'calendar' ? <Calendar navigate={setV2Screen} />
+        : v2Screen === 'profile' ? <ProviderProfileV2 navigate={setV2Screen} />
+        : v2Screen === 'reviews' ? <Reviews navigate={setV2Screen} />
+        : v2Screen === 'notifications' ? <Notifications navigate={setV2Screen} />
+        : v2Screen === 'smartpricing' ? <SmartPricing navigate={setV2Screen} />
+        : v2Screen === 'marketinsights' ? <MarketInsights navigate={setV2Screen} />
+        : v2Screen === 'healthcare' ? <HealthcareV2 navigate={setV2Screen} />
+        : v2Screen === 'support' ? <Support navigate={setV2Screen} />
+        : <Dashboard navigate={setV2Screen} providerProfile={v2ProviderProfile} />
+      }
     </PhoneShell>
   )
 }
