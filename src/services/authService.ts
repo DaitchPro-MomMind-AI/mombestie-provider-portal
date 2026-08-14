@@ -63,3 +63,14 @@ export async function updateEmail(newEmail: string): Promise<AuthResult> {
   if (error) return { ok: false, error: error.message };
   return { ok: true, needsEmailConfirmation: true };
 }
+
+/** Real Supabase password-reset email -- used by AuthGate's "Forgot
+ * password" flow. Always returns ok:true even for an unregistered email
+ * (Supabase's own behavior) so this can't be used to enumerate accounts. */
+export async function requestPasswordReset(email: string): Promise<AuthResult> {
+  if (!supabase) return { ok: false, error: "Backend not configured." };
+  const redirectTo = typeof window !== "undefined" ? window.location.origin + window.location.pathname : undefined;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}

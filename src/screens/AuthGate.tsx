@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { signIn, signUp } from '../services'
+import { signIn, signUp, requestPasswordReset, supabase } from '../services'
 
-type Mode = 'signin' | 'signup' | 'confirm-email'
+type Mode = 'signin' | 'signup' | 'confirm-email' | 'forgot'
 
 const FEATURES = [
   { icon: '📋', label: 'Bookings', bg: '#FFD6C9', fg: '#C94930' },
@@ -56,6 +56,22 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
   // instead of scrolling in lockstep with it.
   const [scrollY, setScrollY] = useState(0)
 
+  // Real forgot-password flow -- Supabase's own resetPasswordForEmail(),
+  // not a fake "check your email" that never sends anything.
+  const [resetSubmitting, setResetSubmitting] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
+  const [resetError, setResetError] = useState<string | null>(null)
+
+  // Real, if modest, "Remember me": Supabase already persists the session
+  // in localStorage by default (that's why you normally stay signed in
+  // across reloads). Unchecking this doesn't fake a new capability -- it
+  // signs you out when you close the tab/window, via a real beforeunload
+  // hook, rather than doing nothing while looking like a working toggle.
+  // Known limit: beforeunload isn't guaranteed on every mobile/native
+  // lifecycle path -- a full solution needs a custom Supabase storage
+  // adapter, which is a larger change than this pass makes.
+  const [rememberMe, setRememberMe] = useState(true)
+
   const submit = async () => {
     setSubmitting(true)
     setError(null)
@@ -70,6 +86,9 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
     const res = await signIn(email, password)
     setSubmitting(false)
     if (!res.ok) { setError(res.error ?? 'Something went wrong.'); return }
+    if (!rememberMe) {
+      window.addEventListener('beforeunload', () => { void supabase?.auth.signOut() })
+    }
     onSignedIn()
   }
 
@@ -106,6 +125,56 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
             <h2 className="font-display text-2xl text-[#242424] mb-2">Confirm your email</h2>
             <p className="text-sm text-[#6E6E73] mb-6">We sent a confirmation link to <span className="font-semibold text-[#242424]">{email}</span>. Click it, then come back and sign in.</p>
             <button onClick={() => setMode('signin')} className="action-btn w-full bg-[#F0E8E4] text-[#6E6E73] font-semibold py-3.5 rounded-2xl">Back to Sign In</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (mode === 'forgot') {
+    return (
+      <div className="h-full w-full overflow-y-auto relative bg-[#FFFCFA] px-5 py-8" onScroll={e => setScrollY(e.currentTarget.scrollTop)}>
+        <BlobLayer />
+        <div className="relative z-10">
+          <Header />
+          <div className="relative overflow-hidden w-full glass-card-strong rounded-[2rem] p-8">
+            <div className="glass-sheen" />
+            {resetSent ? (
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-[#E8F5EE] flex items-center justify-center text-3xl mx-auto mb-4">📬</div>
+                <h2 className="font-display text-2xl text-[#242424] mb-2">Check your email</h2>
+                <p className="text-sm text-[#6E6E73] mb-6">If an account exists for <span className="font-semibold text-[#242424]">{email}</span>, a password reset link is on its way.</p>
+                <button onClick={() => { setMode('signin'); setResetSent(false) }} className="action-btn w-full bg-[#F0E8E4] text-[#6E6E73] font-semibold py-3.5 rounded-2xl">Back to Sign In</button>
+              </div>
+            ) : (
+              <>
+                <div className="w-16 h-16 rounded-full bg-[#FFD6C9] flex items-center justify-center text-3xl mx-auto mb-4">🔑</div>
+                <h2 className="font-display text-2xl text-[#242424] mb-2 text-center">Reset your password</h2>
+                <p className="text-sm text-[#6E6E73] mb-6 text-center">Enter your email and we'll send a real reset link via Supabase.</p>
+                {resetError && (
+                  <div className="rounded-xl px-3.5 py-2.5 mb-3 text-xs text-[#D9534F]" style={{ background: '#FAECEC', border: '1px solid #ECA0A0' }}>{resetError}</div>
+                )}
+                <div className="mb-4">
+                  <label className="text-xs font-semibold text-[#6E6E73] mb-1.5 block">Email address</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base">✉️</span>
+                    <input value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" type="email"
+                      className="cartoon-input w-full pl-10 pr-4 py-3.5 text-[15px]" />
+                  </div>
+                </div>
+                <button onClick={async () => {
+                  setResetSubmitting(true); setResetError(null)
+                  const res = await requestPasswordReset(email)
+                  setResetSubmitting(false)
+                  if (!res.ok) { setResetError(res.error ?? 'Something went wrong.'); return }
+                  setResetSent(true)
+                }} disabled={resetSubmitting || !email.trim()}
+                  className="action-btn w-full coral-gradient text-white font-bold py-4 rounded-2xl mb-3 text-[15px] disabled:opacity-40">
+                  {resetSubmitting ? 'Sending…' : 'Send Reset Link'}
+                </button>
+                <button onClick={() => { setMode('signin'); setResetError(null) }} className="action-btn w-full text-sm font-semibold text-[#6E6E73] py-1.5">← Back to Sign In</button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -174,6 +243,16 @@ export function AuthGate({ onSignedIn }: { onSignedIn: () => void }) {
               </button>
             </div>
           </div>
+
+          {mode === 'signin' && (
+            <div className="flex items-center justify-between mb-1 mt-1">
+              <label className="flex items-center gap-1.5 text-xs text-[#6E6E73] cursor-pointer">
+                <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="w-3.5 h-3.5 accent-[#EE674E]" />
+                Remember me
+              </label>
+              <button type="button" onClick={() => { setMode('forgot'); setError(null) }} className="text-xs font-semibold text-[#EE674E]">Forgot password?</button>
+            </div>
+          )}
 
           <button onClick={submit} disabled={submitting || !email.trim() || !password.trim() || (mode === 'signup' && !fullName.trim())}
             className="action-btn w-full coral-gradient text-white font-bold py-4 rounded-2xl mt-5 mb-3 text-[15px] disabled:opacity-40 flex items-center justify-center gap-1.5"
