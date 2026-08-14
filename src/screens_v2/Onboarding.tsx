@@ -128,6 +128,31 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
     }
   })()
 
+  // Human-readable reason the Continue button is disabled -- the button was
+  // being reported as "not functioning" when it's actually correctly gated
+  // on required fields (most often the 50-char bio minimum); the old UI gave
+  // no visible signal *why* it was disabled beyond a faint gray counter, so
+  // it read as broken. This surfaces the real reason next to the button.
+  const blockedReason = (() => {
+    if (canAdvance) return null
+    switch (step) {
+      case 'about': {
+        const missing: string[] = []
+        if (!firstName.trim()) missing.push('First Name')
+        if (!lastName.trim()) missing.push('Last Name')
+        if (!phone.trim()) missing.push('Phone Number')
+        if (bio.trim().length < 50) missing.push(`About Yourself (${bio.trim().length}/50 characters)`)
+        return `Complete: ${missing.join(', ')}`
+      }
+      case 'area': return 'Enter the city or area you serve'
+      case 'pricing': return 'Enter your hourly rate'
+      case 'availability': return 'Select at least one available day'
+      case 'verification': return 'Upload ID and consent to a background check to continue'
+      case 'payment': return 'Choose a payout method'
+      default: return null
+    }
+  })()
+
   const submit = async () => {
     setSubmitting(true); setError(null)
     const res = await submitProviderApplication({
@@ -279,8 +304,10 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
                 <label style={labelStyle}>About Yourself</label>
                 <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell families about your experience, qualifications and why you love what you do..." rows={4} style={{ ...inputStyle, resize: 'none', lineHeight: 1.5 }}/>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                  <span style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.3)' }}>Write at least 50 characters</span>
-                  <span style={{ fontFamily: 'Inter', fontSize: 11, color: bio.length >= 50 ? '#10B981' : 'rgba(17,26,58,0.3)' }}>{bio.length}/500</span>
+                  <span style={{ fontFamily: 'Inter', fontSize: 11, color: bio.trim().length >= 50 ? '#10B981' : '#F59E0B', fontWeight: bio.trim().length >= 50 ? 400 : 600 }}>
+                    {bio.trim().length >= 50 ? '✓ Minimum met' : `${50 - bio.trim().length} more characters needed`}
+                  </span>
+                  <span style={{ fontFamily: 'Inter', fontSize: 11, color: bio.length >= 50 ? '#10B981' : 'rgba(17,26,58,0.3)' }}>{bio.length}/500 (min 50)</span>
                 </div>
               </div>
               <div>
@@ -496,12 +523,22 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
       </div>
 
       <div style={{ padding: '12px 24px 28px', flexShrink: 0, background: 'linear-gradient(0deg, #FFFFFF 70%, transparent)' }}>
+        {blockedReason && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10,
+            fontFamily: 'Inter', fontSize: 12, color: '#F59E0B', lineHeight: 1.4,
+          }}>
+            <span style={{ flexShrink: 0 }}>⚠️</span>
+            <span>{blockedReason}</span>
+          </div>
+        )}
         <button onClick={next} disabled={!canAdvance || submitting} style={{
-          width: '100%', padding: '15.5px', borderRadius: 14, border: 'none', cursor: canAdvance ? 'pointer' : 'not-allowed',
-          background: 'linear-gradient(135deg, #246BFD, #28A8FF)',
-          boxShadow: '0 8px 24px rgba(36,107,253,0.45)',
-          fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: 'white',
-          opacity: canAdvance ? 1 : 0.5,
+          width: '100%', padding: '15.5px', borderRadius: 14, border: 'none',
+          cursor: canAdvance && !submitting ? 'pointer' : 'not-allowed',
+          background: canAdvance ? 'linear-gradient(135deg, #246BFD, #28A8FF)' : 'rgba(17,26,58,0.15)',
+          boxShadow: canAdvance ? '0 8px 24px rgba(36,107,253,0.45)' : 'none',
+          fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700,
+          color: canAdvance ? 'white' : 'rgba(17,26,58,0.4)',
         }}>
           {submitting ? 'Submitting…' : step === 'review' ? 'Submit Application' : 'Continue'}
         </button>

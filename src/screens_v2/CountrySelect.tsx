@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import type { Screen } from '../App'
+import FlagIcon from '../components/FlagIcon'
 
 interface Props {
   navigate: (s: Screen) => void
@@ -249,7 +250,7 @@ function CountryRow({ c, selected, onSelect }: { c: { flag: string; name: string
         transition: 'all 0.18s',
       }}
     >
-      <span style={{ fontSize: 24, flexShrink: 0 }}>{c.flag}</span>
+      <FlagIcon code={c.code} width={30} radius={4}/>
       <div style={{ flex: 1 }}>
         <div style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 500, color: '#111A3A' }}>{c.name}</div>
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(17,26,58,0.35)', marginTop: 1 }}>{c.dialCode}</div>
