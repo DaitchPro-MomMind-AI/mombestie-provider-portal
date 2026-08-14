@@ -8,6 +8,7 @@ interface Props {
   categoryGroup: string
   countryCode: string
   countryName: string
+  currencySymbol: string
   userId: string
   onSubmitted: () => void
 }
@@ -28,11 +29,30 @@ const STEPS: { key: Step; label: string; icon: string }[] = [
 const STEP_KEYS: Step[] = ['about', 'services', 'area', 'pricing', 'availability', 'verification', 'payment', 'review', 'submitted']
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const PAYOUT_METHODS = [
-  { name: 'bKash', icon: '📱', sub: 'Mobile banking', color: '#E30A14' },
-  { name: 'Nagad', icon: '📲', sub: 'Mobile banking', color: '#FF6B00' },
-  { name: 'Bank Transfer', icon: '🏦', sub: 'NPSB / BEFTN', color: '#246BFD' },
-]
+
+// Country-aware -- found and fixed during verification: this list and the
+// pricing step's currency symbol were both hardcoded to Bangladesh
+// regardless of which country the provider actually picked (a US test
+// registration showed "PAYOUT METHODS — UNITED STATES" listing bKash and
+// Nagad, and a ৳ symbol on a USD rate). Real per-country payout rails
+// beyond BD aren't onboarded yet (see PayoutMethodsCard.tsx's honest
+// empty-state pattern for the equivalent Earnings-screen problem), so
+// this is a reasonable default set, not a claim that these are live --
+// the screen's own copy already says real payout wiring happens after
+// approval.
+function payoutMethodsFor(countryCode: string): { name: string; icon: string; sub: string; color: string }[] {
+  if (countryCode === 'BD') {
+    return [
+      { name: 'bKash', icon: '📱', sub: 'Mobile banking', color: '#E30A14' },
+      { name: 'Nagad', icon: '📲', sub: 'Mobile banking', color: '#FF6B00' },
+      { name: 'Bank Transfer', icon: '🏦', sub: 'NPSB / BEFTN', color: '#246BFD' },
+    ]
+  }
+  return [
+    { name: 'Bank Transfer', icon: '🏦', sub: 'Direct deposit', color: '#246BFD' },
+    { name: 'PayPal', icon: '💳', sub: 'Email-linked payout', color: '#0070BA' },
+  ]
+}
 
 /**
  * Real family-service provider registration -- replaces the prototype
@@ -50,7 +70,8 @@ const PAYOUT_METHODS = [
  * concept -- see PaymentMethodPicker.tsx for the fee flow, not yet
  * re-integrated into this redesigned flow).
  */
-export default function Onboarding({ navigate, category, categoryGroup, countryCode, countryName, userId, onSubmitted }: Props) {
+export default function Onboarding({ navigate, category, categoryGroup, countryCode, countryName, currencySymbol, userId, onSubmitted }: Props) {
+  const PAYOUT_METHODS = payoutMethodsFor(countryCode)
   const [step, setStep] = useState<Step>('about')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -359,7 +380,7 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
 
             <label style={labelStyle}>Price per Hour</label>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ padding: '13px 14px', background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.1)', borderRight: 'none', borderRadius: '12px 0 0 12px', fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#10B981' }}>৳</div>
+              <div style={{ padding: '13px 14px', background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.1)', borderRight: 'none', borderRadius: '12px 0 0 12px', fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#10B981' }}>{currencySymbol}</div>
               <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="700" style={{ ...inputStyle, borderRadius: '0 12px 12px 0', flex: 1 }}/>
             </div>
           </div>
@@ -455,7 +476,7 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
               { title: 'About', items: [`${firstName} ${lastName}`.trim() || '—', phone || '—', `${countryName}`, Array.from(languages).join(', ') || '—'] },
               { title: 'Service', items: [`${category} · ${categoryGroup}`] },
               { title: 'Service Area', items: [serviceCity || '—', serviceRadius] },
-              { title: 'Pricing', items: [hourlyRate ? `৳${hourlyRate}/hr` : '—'] },
+              { title: 'Pricing', items: [hourlyRate ? `${currencySymbol}${hourlyRate}/hr` : '—'] },
               { title: 'Availability', items: [Array.from(selectedDays).join(', ') || 'None selected'] },
               { title: 'Verification', items: [`ID: ${idUploaded ? 'Yes' : 'Pending'}`, `Background check: ${backgroundCheckConsent ? 'Consented' : 'Pending'}`, `Certifications: ${certifications ? 'Yes' : 'None'}`] },
               { title: 'Payout', items: [payoutMethod ?? 'Not selected'] },

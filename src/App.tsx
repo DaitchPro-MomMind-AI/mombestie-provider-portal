@@ -700,6 +700,7 @@ export default function App() {
         <Onboarding navigate={setV2Screen}
           category={regCategory.item} categoryGroup={regCategory.group}
           countryCode={regCountry.code} countryName={regCountry.name}
+          currencySymbol={countries.find(c => c.country_code === regCountry.code)?.currency_symbol ?? '$'}
           userId={userId!}
           onSubmitted={() => { setPendingKind('family'); setHasApplication(true); setV2Screen('dashboard'); setView('pending') }} />
       ) : v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} />
