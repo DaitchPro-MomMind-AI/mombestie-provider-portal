@@ -708,7 +708,7 @@ export default function App() {
         : v2Screen === 'messages' ? <Messages navigate={setV2Screen} />
         : v2Screen === 'earnings' ? <Earnings navigate={setV2Screen} />
         : v2Screen === 'settings' ? <SettingsV2 navigate={setV2Screen} onSignOut={handleSignOut} />
-        : v2Screen === 'more' ? <MoreV2 navigate={setV2Screen} />
+        : v2Screen === 'more' ? <MoreV2 navigate={setV2Screen} onSignOut={handleSignOut} />
         : v2Screen === 'calendar' ? <Calendar navigate={setV2Screen} />
         : v2Screen === 'profile' ? <ProviderProfileV2 navigate={setV2Screen} />
         : v2Screen === 'reviews' ? <Reviews navigate={setV2Screen} />

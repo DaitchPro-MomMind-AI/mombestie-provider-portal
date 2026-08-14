@@ -1,7 +1,12 @@
 import type { Screen } from '../App'
 import BottomNav from '../components/BottomNav'
 
-interface Props { navigate: (s: Screen) => void }
+// onSignOut real -- added directly here per feedback: Sign Out itself was
+// never broken (verified live: it does clear the real session), but it
+// was buried two taps deep (More -> Settings -> scroll to the very
+// bottom of a long list), which is a genuine discoverability problem.
+// Now reachable from the first screen you land on when you tap More.
+interface Props { navigate: (s: Screen) => void; onSignOut: () => void }
 
 const FEATURES = [
   { icon: '👤', label: 'My Profile', sub: 'Edit & preview', screen: 'profile', color: '#246BFD' },
@@ -16,7 +21,7 @@ const FEATURES = [
   { icon: '⚙️', label: 'Settings', sub: 'Account & preferences', screen: 'settings', color: 'rgba(17,26,58,0.5)' },
 ]
 
-export default function More({ navigate }: Props) {
+export default function More({ navigate, onSignOut }: Props) {
   return (
     <div style={{ height: '100%', background: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 80 }} className="scrollbar-hide">
@@ -127,6 +132,18 @@ export default function More({ navigate }: Props) {
               <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.45)', marginTop: 2 }}>What's my recommended price? How do I grow faster?</div>
             </div>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(17,26,58,0.4)" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        {/* Sign Out -- real, right here, not buried in Settings */}
+        <div style={{ padding: '0 16px 24px' }}>
+          <button onClick={onSignOut} style={{
+            width: '100%', padding: '14px 16px', borderRadius: 16, cursor: 'pointer',
+            background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.22)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
+            <span style={{ fontSize: 16 }}>🚪</span>
+            <span style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 600, color: '#FF6B6B' }}>Sign Out</span>
           </button>
         </div>
       </div>
