@@ -79,10 +79,11 @@ function ComingSoonToggle() {
 
 const Chevron = () => <span className="text-[#D8D0CB] text-lg flex-shrink-0">›</span>
 
-export function SettingsPanel({ onSignOut, darkMode, onToggleDarkMode }: {
+export function SettingsPanel({ onSignOut, darkMode, onToggleDarkMode, providerName }: {
   onSignOut: () => void
   darkMode: boolean
   onToggleDarkMode: () => void
+  providerName: string | null
 }) {
   const [email, setEmail] = useState<string | null>(null)
   const [panel, setPanel] = useState<null | 'password' | 'email'>(null)
@@ -91,14 +92,14 @@ export function SettingsPanel({ onSignOut, darkMode, onToggleDarkMode }: {
 
   return (
     <div className="pb-2">
-      {/* Account summary */}
+      {/* Account summary -- real provider name (from providers/healthcare_providers),
+          not the old hardcoded demo fixture. */}
       <div className="relative overflow-hidden glass-card-strong rounded-2xl p-4 flex items-center gap-3 mb-5">
-        <div className="w-12 h-12 rounded-full coral-gradient flex items-center justify-center text-white font-display text-lg flex-shrink-0">J</div>
+        <div className="w-12 h-12 rounded-full coral-gradient flex items-center justify-center text-white font-display text-lg flex-shrink-0">{(providerName ?? '?').charAt(0).toUpperCase()}</div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-[#242424] truncate">Jordan's Care Services</p>
+          <p className="text-sm font-bold text-[#242424] truncate">{providerName ?? 'No profile yet'}</p>
           <p className="text-xs text-[#6E6E73] truncate">{email ?? 'Loading…'}</p>
         </div>
-        <span className="text-xs font-semibold text-[#EE674E] flex items-center gap-0.5 flex-shrink-0">4.9<span>★</span></span>
       </div>
 
       <Section title="Account">

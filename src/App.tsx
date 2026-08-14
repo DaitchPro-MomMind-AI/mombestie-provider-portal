@@ -6,6 +6,7 @@ import { HealthcareWizard } from './screens/HealthcareWizard'
 import { PendingStatusScreen } from './screens/PendingStatusScreen'
 import { PaymentMethodPicker } from './screens/PaymentMethodPicker'
 import { SettingsPanel } from './screens/SettingsPanel'
+import { OverviewPanel } from './screens/OverviewPanel'
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
 // Everything here is a frontend fixture, same status as the customer app's
@@ -13,8 +14,9 @@ import { SettingsPanel } from './screens/SettingsPanel'
 // ../../docs/ARCHITECTURE.md §10 for the real Provider/Booking service contracts
 // this UI is designed to be wired to.
 
-type BookingStatus = 'Requested' | 'Confirmed' | 'Completed' | 'Declined'
-const INITIAL_BOOKINGS: { id: string; customer: string; service: string; when: string; status: BookingStatus; amount: number }[] = [
+export type BookingStatus = 'Requested' | 'Confirmed' | 'Completed' | 'Declined'
+export type Booking = { id: string; customer: string; service: string; when: string; status: BookingStatus; amount: number }
+const INITIAL_BOOKINGS: Booking[] = [
   { id: 'bk_1', customer: 'Sarah M.', service: 'Evening babysitting (3h)', when: 'Today, 6:00 PM', status: 'Requested', amount: 75 },
   { id: 'bk_2', customer: 'Amara O.', service: 'Postpartum support (4h)', when: 'Tomorrow, 9:00 AM', status: 'Confirmed', amount: 140 },
   { id: 'bk_3', customer: 'Wei L.', service: 'Meal preparation', when: 'Aug 8', status: 'Completed', amount: 60 },
@@ -45,7 +47,7 @@ const MORE_NAV = [
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ] as const
 const NAV = [...PRIMARY_NAV, ...MORE_NAV] as const
-type NavId = typeof NAV[number]['id'] | 'more'
+export type NavId = typeof NAV[number]['id'] | 'more'
 
 const COMMISSION_PCT = 10 // reference value — real commission is server-side, per country (see ARCHITECTURE.md §9)
 
@@ -290,7 +292,7 @@ function OnboardingWizard({ onSubmit, onCancel }: { onSubmit: (data: OnboardingD
   )
 }
 
-function StatusPill({ status }: { status: BookingStatus }) {
+export function StatusPill({ status }: { status: BookingStatus }) {
   const styles: Record<BookingStatus, string> = {
     Requested: 'bg-[#FEF7E0] text-[#B8860B]',
     Confirmed: 'bg-[#EBF2FC] text-[#6299D5]',
@@ -459,6 +461,13 @@ export default function App() {
   const [countries, setCountries] = useState<CountryFee[]>([])
   useEffect(() => { listCountries().then(setCountries) }, [])
 
+  // Real provider identity for the header/summary cards -- replaces the
+  // "Jordan's Care Services / San Francisco, CA" demo fixture that was
+  // hardcoded regardless of who was actually signed in (flagged directly:
+  // "demo data must be clearly separated from production"). Falls back to
+  // an honest "no profile yet" state rather than a fake name.
+  const [providerProfile, setProviderProfile] = useState<{ name: string; city: string | null; status: string; verified: boolean } | null>(null)
+
   // Real dark mode -- device-level preference (not per-account), persisted
   // across sessions, same as most native apps. See index.css for the
   // [data-dark="true"] overrides this actually drives.
@@ -474,6 +483,13 @@ export default function App() {
     setUserId(uid)
     const [familyApp, healthcareApp] = await Promise.all([getMyProviderApplication(uid), getMyHealthcareApplication(uid)])
     setProviderCountry(familyApp?.country ?? healthcareApp?.country ?? null)
+    if (familyApp) {
+      setProviderProfile({ name: familyApp.business_name || familyApp.full_name, city: familyApp.service_city, status: familyApp.status, verified: familyApp.status === 'approved' })
+    } else if (healthcareApp) {
+      setProviderProfile({ name: healthcareApp.practice_name || healthcareApp.legal_name, city: healthcareApp.service_city, status: healthcareApp.status, verified: healthcareApp.status === 'approved' })
+    } else {
+      setProviderProfile(null)
+    }
     if (familyApp && familyApp.status !== 'approved') { setPendingKind('family'); setHasApplication(true); setView('pending'); return }
     if (healthcareApp && healthcareApp.status !== 'approved') { setPendingKind('healthcare'); setHasApplication(true); setView('pending'); return }
     setHasApplication(Boolean(familyApp || healthcareApp))
@@ -557,7 +573,9 @@ export default function App() {
         )}
         <div className="flex-1 min-w-0">
           <h1 className="font-display text-xl text-[#242424] capitalize truncate">{currentLabel}</h1>
-          <p className="text-xs text-[#6E6E73] truncate">Jordan's Care Services · San Francisco, CA</p>
+          <p className="text-xs text-[#6E6E73] truncate">
+            {providerProfile ? `${providerProfile.name}${providerProfile.city ? ' · ' + providerProfile.city : ''}` : 'Complete your registration to get started'}
+          </p>
         </div>
       </div>
 
@@ -567,33 +585,19 @@ export default function App() {
             <span className="text-2xl">📝</span>
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#242424]">No provider application on file for this account</p>
-              <p className="text-xs text-[#6E6E73]">The screens below are demo data (Jordan's Care Services). Register a real application to appear in MomBestie's real marketplace/Find Care.</p>
+              <p className="text-xs text-[#6E6E73]">The screens below use placeholder booking data until your real application is approved. Register to appear in MomBestie's real marketplace/Find Care.</p>
             </div>
             <button onClick={() => setView('choose-type')} className="action-btn flex-shrink-0 text-xs font-bold text-white px-3 py-2 rounded-lg" style={{ background: 'linear-gradient(135deg,#EE674E,#F47B66)' }}>Register →</button>
           </div>
         )}
 
         {nav === 'overview' && (
-          <div className="space-y-5">
-            <div className="grid grid-cols-3 gap-2">
-              <Card compact title="Pending"><p className="font-display text-2xl text-[#242424]">{bookings.filter(b => b.status === 'Requested').length}</p></Card>
-              <Card compact title="Upcoming"><p className="font-display text-2xl text-[#242424]">{bookings.filter(b => b.status === 'Confirmed').length}</p></Card>
-              <Card compact title="Rating"><p className="font-display text-2xl text-[#242424]">4.9★</p><p className="text-[10px] text-[#6E6E73]">32 reviews</p></Card>
-            </div>
-            <Card title="Recent activity">
-              <div className="space-y-3">
-                {bookings.map(b => (
-                  <div key={b.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-[#242424]">{b.customer} — {b.service}</p>
-                      <p className="text-xs text-[#6E6E73]">{b.when}</p>
-                    </div>
-                    <StatusPill status={b.status} />
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
+          <OverviewPanel
+            providerProfile={providerProfile}
+            bookings={bookings}
+            totalEarned={totalEarned}
+            onNavigate={setNav}
+          />
         )}
 
         {nav === 'bookings' && (
@@ -636,7 +640,7 @@ export default function App() {
           <div className="space-y-4">
             <Card title="Public profile">
               <div className="space-y-2.5">
-                <input defaultValue="Jordan's Care Services" className="cartoon-input w-full px-4 py-2.5 text-sm" placeholder="Business name" />
+                <input defaultValue={providerProfile?.name ?? ''} className="cartoon-input w-full px-4 py-2.5 text-sm" placeholder="Business name" />
                 <input defaultValue="Babysitting, Postpartum Support" className="cartoon-input w-full px-4 py-2.5 text-sm" placeholder="Categories" />
               </div>
               <textarea defaultValue="8 years of childcare experience, CPR certified, background-checked." className="cartoon-input w-full px-4 py-2.5 text-sm mt-3" rows={3} />
@@ -678,7 +682,7 @@ export default function App() {
           </Card>
         )}
 
-        {nav === 'settings' && <SettingsPanel onSignOut={handleSignOut} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)} />}
+        {nav === 'settings' && <SettingsPanel onSignOut={handleSignOut} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)} providerName={providerProfile?.name ?? null} />}
 
         {nav === 'more' && (
           <div className="space-y-2">

@@ -57,6 +57,22 @@ body {
   box-shadow: 0 8px 32px rgba(238, 103, 78, 0.12), 0 2px 8px rgba(0,0,0,0.06);
 }
 
+/* Ported from mombestie-customer-app/src/index.css -- the AI orb visual
+   used on the Overview dashboard's AI Assistant card. Purely decorative
+   here (glow/pulse), never implies a working response -- the card's own
+   copy is explicit that the assistant isn't connected yet. */
+.ai-orb {
+  background: radial-gradient(circle at 35% 35%, #F47B66, #EE674E 40%, #C94930 100%);
+  box-shadow: 0 0 40px rgba(238, 103, 78, 0.4), 0 0 80px rgba(238, 103, 78, 0.15);
+}
+.ai-orb-pulse {
+  animation: orbPulse 3s ease-in-out infinite;
+}
+@keyframes orbPulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(238, 103, 78, 0.4), 0 0 80px rgba(238, 103, 78, 0.15); transform: scale(1); }
+  50% { box-shadow: 0 0 56px rgba(238, 103, 78, 0.55), 0 0 100px rgba(238, 103, 78, 0.22); transform: scale(1.03); }
+}
+
 .coral-gradient {
   /* Deepened 2026-08-13 per feedback on the Sign In button reading too
      pale/washed-out -- was #EE674E -> #F6A68E (light end nearly peach).
@@ -165,7 +181,7 @@ body {
 [data-dark="true"] .divide-\[\#F6EDE8\] > :not([hidden]) ~ :not([hidden]) { border-color: #3F3F46; }
 
 @media (prefers-reduced-motion: reduce) {
-  .blob, .logo-glow { animation: none !important; }
+  .blob, .logo-glow, .ai-orb-pulse { animation: none !important; }
 }
 
 [data-dark="true"] {
