@@ -66,7 +66,7 @@ export default function Reviews({ navigate }: Props) {
               <span style={{ fontFamily: 'Inter', fontSize: 12 }}>More</span>
             </button>
           </div>
-          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 20 }}>Reviews</div>
+          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', marginBottom: 20 }}>Reviews</div>
 
           {/* Rating overview */}
           <div style={{
@@ -76,7 +76,7 @@ export default function Reviews({ navigate }: Props) {
             <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
               {/* Big rating */}
               <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 52, fontWeight: 800, color: 'white', lineHeight: 1 }}>4.9</div>
+                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 52, fontWeight: 800, color: '#111A3A', lineHeight: 1 }}>4.9</div>
                 <div style={{ color: '#F59E0B', fontSize: 18, marginTop: 4 }}>★★★★★</div>
                 <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.4)', marginTop: 4 }}>47 reviews</div>
               </div>
@@ -112,7 +112,7 @@ export default function Reviews({ navigate }: Props) {
               <span style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#5BAAFF' }}>✨ AI Review Summary</span>
             </div>
             <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(17,26,58,0.82)', margin: 0, lineHeight: 1.55 }}>
-              "Recent customers frequently mention <strong style={{ color: 'white' }}>reliability</strong>, <strong style={{ color: 'white' }}>warmth</strong> and <strong style={{ color: 'white' }}>punctuality</strong>. Parents particularly appreciate your calm handling of newborns and toddlers. Your response time is noted positively."
+              "Recent customers frequently mention <strong style={{ color: '#111A3A' }}>reliability</strong>, <strong style={{ color: '#111A3A' }}>warmth</strong> and <strong style={{ color: '#111A3A' }}>punctuality</strong>. Parents particularly appreciate your calm handling of newborns and toddlers. Your response time is noted positively."
             </p>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function Reviews({ navigate }: Props) {
                   fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 800, color: r.color, flexShrink: 0,
                 }}>{r.avatar}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white' }}>{r.name}</div>
+                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>{r.name}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
                     <div style={{ color: '#F59E0B', fontSize: 12 }}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
                     <span style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.35)' }}>{r.date}</span>
@@ -198,7 +198,7 @@ export default function Reviews({ navigate }: Props) {
                     style={{
                       width: '100%', padding: '11px 14px', borderRadius: 12,
                       background: 'rgba(17,26,58,0.07)', border: '1px solid rgba(17,26,58,0.12)',
-                      color: 'white', fontFamily: 'Inter', fontSize: 13.5, outline: 'none',
+                      color: '#111A3A', fontFamily: 'Inter', fontSize: 13.5, outline: 'none',
                       resize: 'none', boxSizing: 'border-box', marginBottom: 8,
                     }}
                   />

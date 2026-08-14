@@ -106,7 +106,7 @@ export default function AIHome({ navigate }: Props) {
           }} className={orbClass}/>
         </div>
 
-        <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 18, fontWeight: 800, color: 'white', textAlign: 'center' }}>MomBestie AI</div>
+        <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 18, fontWeight: 800, color: '#111A3A', textAlign: 'center' }}>MomBestie AI</div>
         <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.4)', marginTop: 3 }}>
           {orbState === 'idle' ? 'Your AI Business Partner' : orbState === 'thinking' ? 'Thinking...' : orbState === 'listening' ? 'Listening...' : 'Speaking...'}
         </div>
@@ -163,7 +163,7 @@ export default function AIHome({ navigate }: Props) {
               maxWidth: '82%', padding: '12px 14px', borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
               background: msg.role === 'user' ? 'linear-gradient(135deg, #246BFD 0%, #28A8FF 100%)' : 'rgba(17,26,58,0.07)',
               border: msg.role === 'ai' ? '1px solid rgba(17,26,58,0.1)' : 'none',
-              fontFamily: 'Inter', fontSize: 13.5, color: 'white', lineHeight: 1.55,
+              fontFamily: 'Inter', fontSize: 13.5, color: msg.role === 'user' ? 'white' : '#111A3A', lineHeight: 1.55,
             }}>
               {formatMsg(msg.text)}
               <div style={{ fontFamily: 'Inter', fontSize: 10, color: msg.role === 'user' ? 'rgba(17,26,58,0.6)' : 'rgba(17,26,58,0.3)', marginTop: 6, textAlign: 'right' }}>{msg.ts}</div>
@@ -212,7 +212,7 @@ export default function AIHome({ navigate }: Props) {
               style={{
                 width: '100%', padding: '12px 44px 12px 16px', borderRadius: 24,
                 background: 'rgba(17,26,58,0.08)', border: '1px solid rgba(17,26,58,0.12)',
-                color: 'white', fontFamily: 'Inter', fontSize: 14, outline: 'none',
+                color: '#111A3A', fontFamily: 'Inter', fontSize: 14, outline: 'none',
                 boxSizing: 'border-box',
               }}
             />

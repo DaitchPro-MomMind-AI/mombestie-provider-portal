@@ -52,7 +52,7 @@ export default function ProviderProfile({ navigate }: Props) {
               }}>AR</div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 20, fontWeight: 800, color: '#FFFFFF' }}>Ayesha Rahman</div>
+                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 20, fontWeight: 800, color: '#111A3A' }}>Ayesha Rahman</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}>
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="#10B981"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     <span style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: 600, color: '#10B981' }}>Verified</span>
@@ -60,7 +60,7 @@ export default function ProviderProfile({ navigate }: Props) {
                 </div>
                 <div style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(0,0,0,0.55)', marginTop: 4 }}>Babysitter & Childcare Specialist</div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                  <div style={{ fontFamily: 'Inter', fontSize: 13, color: '#FFFFFF', fontWeight: 600 }}>⭐ 4.9 <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.45)' }}>(47 reviews)</span></div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 13, color: '#111A3A', fontWeight: 600 }}>⭐ 4.9 <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.45)' }}>(47 reviews)</span></div>
                   <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>📍 Dhaka · 5 km</div>
                 </div>
               </div>
@@ -77,21 +77,21 @@ export default function ProviderProfile({ navigate }: Props) {
           </div>
 
           <div style={{ background: 'white', padding: '16px', marginBottom: 8 }}>
-            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#FFFFFF', marginBottom: 12 }}>Services & Pricing</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#111A3A', marginBottom: 12 }}>Services & Pricing</div>
             {SERVICES.map(s => (
               <div key={s.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-                <div style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 500, color: '#FFFFFF' }}>{s.name}</div>
+                <div style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 500, color: '#111A3A' }}>{s.name}</div>
                 <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#246BFD' }}>{s.rate}</div>
               </div>
             ))}
           </div>
 
           <div style={{ background: 'white', padding: '16px' }}>
-            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#FFFFFF', marginBottom: 12 }}>Details</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#111A3A', marginBottom: 12 }}>Details</div>
             {[['Response time', '< 1 hour'], ['Languages', 'Bengali, English'], ['Experience', '5+ years'], ['Children preferred', '0–10 years']].map(([k, v]) => (
               <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
                 <span style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(0,0,0,0.5)' }}>{k}</span>
-                <span style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: '#FFFFFF' }}>{v}</span>
+                <span style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: '#111A3A' }}>{v}</span>
               </div>
             ))}
           </div>
@@ -143,7 +143,7 @@ export default function ProviderProfile({ navigate }: Props) {
               </button>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 20, fontWeight: 800, color: 'white' }}>Ayesha Rahman</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 20, fontWeight: 800, color: '#111A3A' }}>Ayesha Rahman</div>
               <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.5)', marginTop: 3 }}>Babysitter · Childcare · Dhaka 🇧🇩</div>
               <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                 <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#10B981' }}>✓ Verified</div>
@@ -160,7 +160,7 @@ export default function ProviderProfile({ navigate }: Props) {
             background: 'rgba(36,107,253,0.1)', border: '1px solid rgba(36,107,253,0.22)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: 'white' }}>Profile Strength</span>
+              <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: '#111A3A' }}>Profile Strength</span>
               <span style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 800, color: '#246BFD' }}>78%</span>
             </div>
             <div style={{ height: 6, borderRadius: 3, background: 'rgba(17,26,58,0.1)' }}>
@@ -182,7 +182,7 @@ export default function ProviderProfile({ navigate }: Props) {
           ].map(s => (
             <div key={s.label} style={{ padding: '12px 8px', borderRadius: 14, background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.07)', textAlign: 'center' }}>
               <div style={{ fontSize: 16, marginBottom: 4 }}>{s.icon}</div>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 800, color: 'white' }}>{s.value}</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 800, color: '#111A3A' }}>{s.value}</div>
               <div style={{ fontFamily: 'Inter', fontSize: 9.5, color: 'rgba(17,26,58,0.35)', marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
@@ -217,7 +217,7 @@ export default function ProviderProfile({ navigate }: Props) {
                 display: 'flex', alignItems: 'center', gap: 12,
               }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white' }}>{s.name}</div>
+                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>{s.name}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                     <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#10B981' }}>{s.rate}</span>
                     <span style={{ fontFamily: 'Inter', fontSize: 10, color: 'rgba(17,26,58,0.3)' }}>·</span>
@@ -265,7 +265,7 @@ export default function ProviderProfile({ navigate }: Props) {
               }}>
                 <span style={{ fontSize: 18, flexShrink: 0 }}>{v.icon}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: 'white' }}>{v.label}</div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: '#111A3A' }}>{v.label}</div>
                   <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: v.color, marginTop: 2 }}>✓ {v.status}</div>
                 </div>
               </div>

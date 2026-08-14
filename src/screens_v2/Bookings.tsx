@@ -44,7 +44,7 @@ export default function Bookings({ navigate }: Props) {
     <div style={{ height: '100%', background: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ padding: '48px 20px 0', flexShrink: 0 }}>
-        <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 16 }}>Bookings</div>
+        <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', marginBottom: 16 }}>Bookings</div>
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 16 }} className="scrollbar-hide">
           {TABS.map((t, i) => (
@@ -98,7 +98,7 @@ export default function Bookings({ navigate }: Props) {
                     fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 800, color: '#246BFD',
                   }}>FM</div>
                   <div>
-                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: 'white' }}>Fatima M.</div>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: '#111A3A' }}>Fatima M.</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.45)' }}>⭐ New customer · Verified</div>
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export default function Bookings({ navigate }: Props) {
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(168,85,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: '#A855F7' }}>TK</div>
                   <div>
-                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white' }}>Tasneem K.</div>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>Tasneem K.</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.4)' }}>Overnight Care · Aug 20</div>
                   </div>
                 </div>
@@ -213,7 +213,7 @@ export default function Bookings({ navigate }: Props) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
                   <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(36,107,253,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: '#246BFD' }}>{b.avatar}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white' }}>{b.customer}</div>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>{b.customer}</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.45)' }}>{b.service} · {b.date} · {b.time}</div>
                   </div>
                   <div style={{ fontFamily: 'JetBrains Mono', fontSize: 13, fontWeight: 700, color: '#10B981' }}>{b.net}</div>
@@ -233,7 +233,7 @@ export default function Bookings({ navigate }: Props) {
               <div key={i} style={{ padding: '14px', borderRadius: 16, background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.08)', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: '#10B981' }}>{b.avatar}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white' }}>{b.customer}</div>
+                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>{b.customer}</div>
                   <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.4)' }}>{b.service} · {b.date}</div>
                   <div style={{ marginTop: 4, color: '#F59E0B', fontSize: 12 }}>{'★'.repeat(b.rating)}{'☆'.repeat(5 - b.rating)}</div>
                 </div>

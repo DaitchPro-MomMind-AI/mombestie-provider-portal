@@ -35,7 +35,7 @@ export default function Earnings({ navigate }: Props) {
           <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(36,107,253,0.15) 0%, transparent 70%)', pointerEvents: 'none' }}/>
           <div style={{ position: 'absolute', bottom: -20, left: -20, width: 150, height: 150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)', pointerEvents: 'none' }}/>
 
-          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 20 }}>Earnings</div>
+          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', marginBottom: 20 }}>Earnings</div>
 
           {/* Balance hero card */}
           <div style={{
@@ -45,7 +45,7 @@ export default function Earnings({ navigate }: Props) {
             border: '1px solid rgba(36,107,253,0.35)',
           }}>
             <div style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 500, color: 'rgba(17,26,58,0.5)', letterSpacing: 0.5, marginBottom: 6 }}>AVAILABLE BALANCE</div>
-            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 40, fontWeight: 800, color: 'white', letterSpacing: '-1px', lineHeight: 1 }}>৳4,850</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 40, fontWeight: 800, color: '#111A3A', letterSpacing: '-1px', lineHeight: 1 }}>৳4,850</div>
             <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(17,26,58,0.45)', marginTop: 6 }}>Bangladesh Taka · BDT</div>
             <div style={{ marginTop: 16 }}>
               <button style={{
@@ -87,7 +87,7 @@ export default function Earnings({ navigate }: Props) {
                 flex: 1, padding: '8px', borderRadius: 9, border: 'none', cursor: 'pointer',
                 background: period === i ? 'rgba(17,26,58,0.12)' : 'transparent',
                 fontFamily: 'Inter', fontSize: 12, fontWeight: 600,
-                color: period === i ? 'white' : 'rgba(17,26,58,0.4)',
+                color: period === i ? '#111A3A' : 'rgba(17,26,58,0.4)',
                 transition: 'all 0.2s',
               }}>{p}</button>
             ))}
@@ -96,7 +96,7 @@ export default function Earnings({ navigate }: Props) {
           {/* Period totals */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
             {[
-              { label: 'Gross', value: TOTALS[period], color: 'white' },
+              { label: 'Gross', value: TOTALS[period], color: '#111A3A' },
               { label: 'Commission (15%)', value: period === 0 ? '৳4,268' : period === 1 ? '৳7,230' : '৳48,720', color: '#FF6B6B' },
               { label: 'Net Earned', value: NETS[period], color: '#10B981' },
             ].map(s => (
@@ -139,7 +139,7 @@ export default function Earnings({ navigate }: Props) {
           }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>📱</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: 'white' }}>Payout via bKash</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: '#111A3A' }}>Payout via bKash</div>
               <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.45)', marginTop: 2 }}>01XXXXXXXXXX · Verified</div>
             </div>
             <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter', fontSize: 12, color: '#246BFD' }}>Change</button>
@@ -160,7 +160,7 @@ export default function Earnings({ navigate }: Props) {
                   fontFamily: 'Plus Jakarta Sans', fontSize: 12, fontWeight: 700, color: '#10B981', flexShrink: 0,
                 }}>{t.customer.split(' ').map(w => w[0]).join('')}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: 'white' }}>{t.customer}</div>
+                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: '#111A3A' }}>{t.customer}</div>
                   <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgba(17,26,58,0.4)', marginTop: 2 }}>{t.service} · {t.date}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>

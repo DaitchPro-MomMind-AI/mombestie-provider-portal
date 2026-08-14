@@ -31,7 +31,7 @@ export default function Healthcare({ navigate }: Props) {
   const inputStyle = {
     width: '100%', padding: '13px 16px', borderRadius: 12,
     background: 'rgba(17,26,58,0.07)', border: '1px solid rgba(17,26,58,0.12)',
-    color: 'white', fontFamily: 'Inter, sans-serif', fontSize: 14.5,
+    color: '#111A3A', fontFamily: 'Inter, sans-serif', fontSize: 14.5,
     outline: 'none', boxSizing: 'border-box' as const,
   }
 
@@ -52,7 +52,7 @@ export default function Healthcare({ navigate }: Props) {
           <button onClick={() => step === 'select' ? navigate('more') : setStep('select')} style={{
             background: 'rgba(17,26,58,0.08)', border: '1px solid rgba(17,26,58,0.12)',
             borderRadius: 10, width: 38, height: 38, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#111A3A',
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
@@ -84,7 +84,7 @@ export default function Healthcare({ navigate }: Props) {
 
         {step === 'select' && (
           <div>
-            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: 'white', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: '#111A3A', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
               What type of healthcare provider are you?
             </h2>
             <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(17,26,58,0.45)', margin: '0 0 24px', lineHeight: 1.55 }}>
@@ -110,7 +110,7 @@ export default function Healthcare({ navigate }: Props) {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
                   }}>{sp.icon}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: 'white' }}>{sp.name}</div>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: '#111A3A' }}>{sp.name}</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.45)', marginTop: 2 }}>{sp.sub}</div>
                   </div>
                   <div style={{
@@ -145,7 +145,7 @@ export default function Healthcare({ navigate }: Props) {
 
         {step === 'identity' && (
           <div>
-            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: 'white', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: '#111A3A', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
               Professional Identity
             </h2>
             <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(17,26,58,0.45)', margin: '0 0 24px', lineHeight: 1.5 }}>
@@ -194,7 +194,7 @@ export default function Healthcare({ navigate }: Props) {
 
         {step === 'license' && (
           <div>
-            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: 'white', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: '#111A3A', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
               Medical License
             </h2>
             <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(17,26,58,0.45)', margin: '0 0 24px', lineHeight: 1.5 }}>
@@ -261,7 +261,7 @@ export default function Healthcare({ navigate }: Props) {
 
         {step === 'specialty' && (
           <div>
-            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: 'white', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: '#111A3A', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
               Consultation Types
             </h2>
             <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(17,26,58,0.45)', margin: '0 0 24px', lineHeight: 1.5 }}>
@@ -285,7 +285,7 @@ export default function Healthcare({ navigate }: Props) {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
                   }}>{ct.icon}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: ct.enabled ? 'white' : 'rgba(17,26,58,0.5)' }}>{ct.label}</div>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: ct.enabled ? '#111A3A' : 'rgba(17,26,58,0.5)' }}>{ct.label}</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.4)', marginTop: 2 }}>{ct.sub}</div>
                   </div>
                   <div style={{
@@ -309,7 +309,7 @@ export default function Healthcare({ navigate }: Props) {
 
         {step === 'verification' && (
           <div>
-            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: 'white', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: '#111A3A', margin: '0 0 8px', letterSpacing: '-0.4px' }}>
               Medical Verification
             </h2>
             <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(17,26,58,0.45)', margin: '0 0 24px', lineHeight: 1.5 }}>
@@ -338,7 +338,7 @@ export default function Healthcare({ navigate }: Props) {
                 }}>
                   <span style={{ fontSize: 18, flexShrink: 0 }}>{v.icon}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: 'white' }}>{v.label}</div>
+                    <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: '#111A3A' }}>{v.label}</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.35)', marginTop: 2 }}>{v.desc}</div>
                   </div>
                   <div style={{

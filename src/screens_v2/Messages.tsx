@@ -54,12 +54,12 @@ export default function Messages({ navigate }: Props) {
           flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={() => setOpenThread(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', padding: 4 }}>
+            <button onClick={() => setOpenThread(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#111A3A', padding: 4 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${thread.color}20`, border: `1.5px solid ${thread.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 800, color: thread.color }}>{thread.avatar}</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: 'white' }}>{thread.name}</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: '#111A3A' }}>{thread.name}</div>
               <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.4)' }}>{thread.service}</div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -137,7 +137,7 @@ export default function Messages({ navigate }: Props) {
                   background: isProvider ? 'linear-gradient(135deg, #246BFD, #28A8FF)' : 'rgba(17,26,58,0.08)',
                   border: isProvider ? 'none' : '1px solid rgba(17,26,58,0.1)',
                 }}>
-                  <div style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'white', lineHeight: 1.5 }}>{m.text}</div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 13.5, color: isProvider ? 'white' : '#111A3A', lineHeight: 1.5 }}>{m.text}</div>
                   <div style={{ fontFamily: 'Inter', fontSize: 10, color: isProvider ? 'rgba(17,26,58,0.6)' : 'rgba(17,26,58,0.35)', marginTop: 5, textAlign: 'right' }}>{m.time}</div>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function Messages({ navigate }: Props) {
                 style={{
                   width: '100%', padding: '11px 44px 11px 16px', borderRadius: 24,
                   background: 'rgba(17,26,58,0.08)', border: '1px solid rgba(17,26,58,0.12)',
-                  color: 'white', fontFamily: 'Inter', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+                  color: '#111A3A', fontFamily: 'Inter', fontSize: 14, outline: 'none', boxSizing: 'border-box',
                 }}
               />
               <button style={{
@@ -199,7 +199,7 @@ export default function Messages({ navigate }: Props) {
       {/* Header */}
       <div style={{ padding: '48px 20px 0', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white' }}>Messages</div>
+          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A' }}>Messages</div>
           <button onClick={() => navigate('ai')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 20, background: 'rgba(36,107,253,0.15)', border: '1px solid rgba(36,107,253,0.3)', cursor: 'pointer', fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#246BFD' }}>
             ✨ AI Chat
           </button>
@@ -212,7 +212,7 @@ export default function Messages({ navigate }: Props) {
               flex: 1, padding: '8px', borderRadius: 9, border: 'none', cursor: 'pointer',
               background: tab === i ? 'rgba(17,26,58,0.12)' : 'transparent',
               fontFamily: 'Inter', fontSize: 13, fontWeight: 600,
-              color: tab === i ? 'white' : 'rgba(17,26,58,0.45)',
+              color: tab === i ? '#111A3A' : 'rgba(17,26,58,0.45)',
               transition: 'all 0.2s',
             }}>{t}</button>
           ))}
@@ -226,7 +226,7 @@ export default function Messages({ navigate }: Props) {
           <input placeholder="Search conversations..." style={{
             width: '100%', padding: '11px 14px 11px 34px', borderRadius: 12,
             background: 'rgba(17,26,58,0.07)', border: '1px solid rgba(17,26,58,0.1)',
-            color: 'white', fontFamily: 'Inter', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+            color: '#111A3A', fontFamily: 'Inter', fontSize: 14, outline: 'none', boxSizing: 'border-box',
           }}/>
         </div>
       </div>
@@ -263,7 +263,7 @@ export default function Messages({ navigate }: Props) {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: t.unread > 0 ? 700 : 600, color: 'white' }}>{t.name}</div>
+                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: t.unread > 0 ? 700 : 600, color: '#111A3A' }}>{t.name}</div>
                 <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.35)', flexShrink: 0, marginLeft: 8 }}>{t.time}</div>
               </div>
               <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: '#246BFD', marginBottom: 4 }}>{t.service}</div>
@@ -290,7 +290,7 @@ export default function Messages({ navigate }: Props) {
                 boxShadow: '0 0 24px rgba(36,107,253,0.6)',
                 marginBottom: 14,
               }} className="anim-orb-idle"/>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 17, fontWeight: 800, color: 'white', marginBottom: 6 }}>MomBestie AI</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 17, fontWeight: 800, color: '#111A3A', marginBottom: 6 }}>MomBestie AI</div>
               <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.5)', lineHeight: 1.5, marginBottom: 16 }}>
                 Your AI business partner. Ask anything about your bookings, pricing, customers and earnings.
               </div>

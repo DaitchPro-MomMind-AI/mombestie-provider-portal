@@ -64,7 +64,7 @@ export default function Calendar({ navigate }: Props) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
               <span style={{ fontFamily: 'Inter', fontSize: 12 }}>More</span>
             </button>
-            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white' }}>Calendar</div>
+            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A' }}>Calendar</div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button style={{
@@ -84,7 +84,7 @@ export default function Calendar({ navigate }: Props) {
               flex: 1, padding: '8px', borderRadius: 9, border: 'none', cursor: 'pointer',
               background: view === v ? 'rgba(17,26,58,0.12)' : 'transparent',
               fontFamily: 'Inter', fontSize: 13, fontWeight: 600,
-              color: view === v ? 'white' : 'rgba(17,26,58,0.4)', textTransform: 'capitalize',
+              color: view === v ? '#111A3A' : 'rgba(17,26,58,0.4)', textTransform: 'capitalize',
             }}>{v}</button>
           ))}
         </div>
@@ -121,7 +121,7 @@ export default function Calendar({ navigate }: Props) {
               borderBottom: '1px solid rgba(17,26,58,0.07)',
             }}>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(17,26,58,0.4)', fontSize: 18 }}>‹</button>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: 'white' }}>August 2026</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#111A3A' }}>August 2026</div>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(17,26,58,0.4)', fontSize: 18 }}>›</button>
             </div>
 
@@ -314,7 +314,7 @@ export default function Calendar({ navigate }: Props) {
                 style={{
                   flex: 1, padding: '11px 14px', borderRadius: 12,
                   background: 'rgba(17,26,58,0.08)', border: '1px solid rgba(17,26,58,0.12)',
-                  color: 'white', fontFamily: 'Inter', fontSize: 13.5, outline: 'none',
+                  color: '#111A3A', fontFamily: 'Inter', fontSize: 13.5, outline: 'none',
                 }}
               />
               <button onClick={handleAI} style={{

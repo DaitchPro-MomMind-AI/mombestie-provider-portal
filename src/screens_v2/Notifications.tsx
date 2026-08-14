@@ -43,7 +43,7 @@ export default function Notifications({ navigate }: Props) {
               <span style={{ fontFamily: 'Inter', fontSize: 12 }}>More</span>
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white' }}>Notifications</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A' }}>Notifications</div>
               {unreadCount > 0 && (
                 <div style={{
                   width: 22, height: 22, borderRadius: '50%', background: '#246BFD',
@@ -112,7 +112,7 @@ export default function Notifications({ navigate }: Props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                   <div style={{
                     fontFamily: 'Plus Jakarta Sans', fontSize: 13.5, fontWeight: isRead ? 600 : 700,
-                    color: isRead ? 'rgba(17,26,58,0.75)' : 'white',
+                    color: isRead ? 'rgba(17,26,58,0.75)' : '#111A3A',
                   }}>{n.title}</div>
                   <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: 'rgba(17,26,58,0.3)', flexShrink: 0, marginLeft: 8 }}>{n.time}</div>
                 </div>

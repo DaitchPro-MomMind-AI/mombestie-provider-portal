@@ -63,7 +63,7 @@ export default function MarketInsights({ navigate }: Props) {
               <span style={{ fontFamily: 'Inter', fontSize: 12 }}>More</span>
             </button>
           </div>
-          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 4 }}>Market Insights</div>
+          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', marginBottom: 4 }}>Market Insights</div>
           <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.4)' }}>Local demand data for Dhaka, Bangladesh 🇧🇩</div>
         </div>
 
@@ -75,7 +75,7 @@ export default function MarketInsights({ navigate }: Props) {
                 flex: 1, padding: '8px', borderRadius: 9, border: 'none', cursor: 'pointer',
                 background: period === i ? 'rgba(17,26,58,0.12)' : 'transparent',
                 fontFamily: 'Inter', fontSize: 13, fontWeight: 600,
-                color: period === i ? 'white' : 'rgba(17,26,58,0.4)',
+                color: period === i ? '#111A3A' : 'rgba(17,26,58,0.4)',
               }}>{p}</button>
             ))}
           </div>
@@ -160,7 +160,7 @@ export default function MarketInsights({ navigate }: Props) {
                   }}>{ins.icon}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: 'Inter', fontSize: 10.5, fontWeight: 700, color: ins.color, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 }}>{ins.label}</div>
-                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 5 }}>{ins.title}</div>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A', marginBottom: 5 }}>{ins.title}</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(17,26,58,0.6)', lineHeight: 1.5 }}>{ins.body}</div>
                     {ins.action && ins.actionScreen && (
                       <button onClick={() => navigate(ins.actionScreen as Screen)} style={{

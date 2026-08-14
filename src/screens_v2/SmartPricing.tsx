@@ -81,7 +81,7 @@ export default function SmartPricing({ navigate }: Props) {
               flexShrink: 0,
             }} className="anim-orb-idle"/>
             <div>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white', letterSpacing: '-0.4px' }}>AI Smart Pricing</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', letterSpacing: '-0.4px' }}>AI Smart Pricing</div>
               <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.4)', marginTop: 2 }}>Powered by local marketplace intelligence</div>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function SmartPricing({ navigate }: Props) {
                 border: applied ? '1px solid rgba(16,185,129,0.25)' : '1px solid rgba(17,26,58,0.1)',
               }}>
                 <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.4)', marginBottom: 8, letterSpacing: 0.5 }}>YOUR PRICE</div>
-                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 26, fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
+                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 26, fontWeight: 800, color: '#111A3A', letterSpacing: '-0.5px' }}>
                   {service.currency}{effectivePrice.toLocaleString()}
                 </div>
                 <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgba(17,26,58,0.4)', marginTop: 4 }}>per {service.unit}</div>
@@ -269,7 +269,7 @@ export default function SmartPricing({ navigate }: Props) {
               background: 'radial-gradient(circle, #246BFD, #7C3AED)',
               flexShrink: 0,
             }} className={thinking ? 'anim-orb-think' : 'anim-orb-idle'}/>
-            <span style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 600, color: thinking ? '#5BAAFF' : 'white' }}>
+            <span style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 600, color: thinking ? '#5BAAFF' : '#111A3A' }}>
               {thinking ? 'Analyzing local market...' : 'See Why AI Recommends This'}
             </span>
           </button>
@@ -310,7 +310,7 @@ export default function SmartPricing({ navigate }: Props) {
           }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(40,168,255,0.15)', border: '1px solid rgba(40,168,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>📊</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white' }}>View Market Insights</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>View Market Insights</div>
               <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.4)', marginTop: 2 }}>Demand trends, popular times, local data</div>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(17,26,58,0.3)" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>

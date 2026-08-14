@@ -30,7 +30,7 @@ export default function Support({ navigate }: Props) {
               <span style={{ fontFamily: 'Inter', fontSize: 12 }}>More</span>
             </button>
           </div>
-          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 16 }}>Support & Safety</div>
+          <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', marginBottom: 16 }}>Support & Safety</div>
 
           {/* Tabs */}
           <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }} className="scrollbar-hide">
@@ -60,7 +60,7 @@ export default function Support({ navigate }: Props) {
                 flexShrink: 0, boxShadow: '0 0 14px rgba(36,107,253,0.5)',
               }} className="anim-orb-idle"/>
               <div>
-                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: 'white' }}>Ask MomBestie AI</div>
+                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: '#111A3A' }}>Ask MomBestie AI</div>
                 <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 3 }}>Instant answers about your account, payouts, bookings and features.</div>
               </div>
             </button>
@@ -78,7 +78,7 @@ export default function Support({ navigate }: Props) {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0,
                   }}>{h.icon}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 500, color: 'white' }}>{h.label}</div>
+                    <div style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 500, color: '#111A3A' }}>{h.label}</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgba(17,26,58,0.4)', marginTop: 2 }}>{h.sub}</div>
                   </div>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(17,26,58,0.25)" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -106,7 +106,7 @@ export default function Support({ navigate }: Props) {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0,
                   }}>{c.icon}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white' }}>{c.label}</div>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>{c.label}</div>
                     <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.45)', marginTop: 2 }}>{c.sub}</div>
                   </div>
                   {c.badge && (
@@ -172,7 +172,7 @@ export default function Support({ navigate }: Props) {
                     }}>
                       <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(255,107,107,0.12)', border: '1px solid rgba(255,107,107,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{r.icon}</div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: 'white' }}>{r.label}</div>
+                        <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: '#111A3A' }}>{r.label}</div>
                         <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgba(17,26,58,0.4)', marginTop: 2 }}>{r.sub}</div>
                       </div>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(17,26,58,0.25)" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -189,7 +189,7 @@ export default function Support({ navigate }: Props) {
                     style={{
                       width: '100%', padding: '12px 14px', borderRadius: 12,
                       background: 'rgba(17,26,58,0.07)', border: '1px solid rgba(17,26,58,0.12)',
-                      color: 'white', fontFamily: 'Inter', fontSize: 13.5, outline: 'none',
+                      color: '#111A3A', fontFamily: 'Inter', fontSize: 13.5, outline: 'none',
                       resize: 'none', boxSizing: 'border-box',
                     }}
                   />
@@ -209,7 +209,7 @@ export default function Support({ navigate }: Props) {
               padding: '16px', borderRadius: 18, marginBottom: 16,
               background: 'rgba(36,107,253,0.1)', border: '1px solid rgba(36,107,253,0.22)',
             }}>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: 'white', marginBottom: 8 }}>Your Safety is Our Priority</div>
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 700, color: '#111A3A', marginBottom: 8 }}>Your Safety is Our Priority</div>
               <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.6)', lineHeight: 1.55 }}>
                 MomBestie takes provider safety seriously. All customers are verified. All bookings are documented. You can always contact our safety team.
               </div>
@@ -236,7 +236,7 @@ export default function Support({ navigate }: Props) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0,
                 }}>{s.icon}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: 'white' }}>{s.title}</div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500, color: '#111A3A' }}>{s.title}</div>
                   <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: s.highlight ? '#FF6B6B' : 'rgba(17,26,58,0.4)', marginTop: 2 }}>{s.sub}</div>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(17,26,58,0.25)" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
