@@ -25,6 +25,10 @@ import SignIn from './screens_v2/SignIn'
 import SignUp from './screens_v2/SignUp'
 import ForgotPassword from './screens_v2/ForgotPassword'
 import ConfirmEmail from './screens_v2/ConfirmEmail'
+import CountrySelect from './screens_v2/CountrySelect'
+import LanguageSelect from './screens_v2/LanguageSelect'
+import ProviderType from './screens_v2/ProviderType'
+import Onboarding from './screens_v2/Onboarding'
 import Dashboard from './screens_v2/Dashboard'
 import Bookings from './screens_v2/Bookings'
 import AIHome from './screens_v2/AIHome'
@@ -517,6 +521,12 @@ export default function App() {
   const [v2Screen, setV2Screen] = useState<Screen>('splash')
   const [pendingSignupEmail, setPendingSignupEmail] = useState('')
 
+  // Real registration flow state -- carries the Country -> Language ->
+  // Provider Type selections through to Onboarding/HealthcareWizard's
+  // real submission.
+  const [regCountry, setRegCountry] = useState({ name: 'Bangladesh', code: 'BD' })
+  const [regCategory, setRegCategory] = useState<{ item: string; group: string } | null>(null)
+
   // Real dark mode -- device-level preference (not per-account), persisted
   // across sessions, same as most native apps. See index.css for the
   // [data-dark="true"] overrides this actually drives.
@@ -541,8 +551,14 @@ export default function App() {
     }
     if (familyApp && familyApp.status !== 'approved') { setPendingKind('family'); setHasApplication(true); setView('pending'); return }
     if (healthcareApp && healthcareApp.status !== 'approved') { setPendingKind('healthcare'); setHasApplication(true); setView('pending'); return }
-    setHasApplication(Boolean(familyApp || healthcareApp))
+    const has = Boolean(familyApp || healthcareApp)
+    setHasApplication(has)
     setView('dashboard')
+    // A signed-in provider with no application on file goes straight into
+    // real registration (Country -> Language -> Provider Type -> Onboarding)
+    // instead of landing on a dashboard full of someone else's placeholder
+    // bookings with no obvious way to actually register.
+    if (!has) setV2Screen('country')
   }
 
   useEffect(() => {
@@ -660,7 +676,33 @@ export default function App() {
 
   return (
     <PhoneShell dark={darkMode}>
-      {v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} />
+      {/* Real registration flow: Country -> Language -> Provider Type ->
+          Onboarding (family-service) or the real HealthcareWizard
+          (different table/fields entirely -- license, specialty,
+          credentials -- so a Healthcare-group pick routes there instead
+          of into Onboarding.tsx). This is the flow item 1's complaint was
+          about: it exists for real now, not skipped in favor of the old
+          plainer wizard. */}
+      {v2Screen === 'country' ? (
+        <CountrySelect navigate={setV2Screen} onSelect={(name, code) => { setRegCountry({ name, code }); setV2Screen('language') }} />
+      ) : v2Screen === 'language' ? (
+        <LanguageSelect navigate={setV2Screen} country={regCountry.name} countryCode={regCountry.code} />
+      ) : v2Screen === 'providertype' ? (
+        <ProviderType navigate={setV2Screen} onContinue={(item, group) => {
+          setRegCategory({ item, group })
+          setV2Screen('onboarding')
+        }} />
+      ) : v2Screen === 'onboarding' && regCategory?.group === 'Healthcare' ? (
+        <HealthcareWizard userId={userId!}
+          onSubmitted={() => { setPendingKind('healthcare'); setHasApplication(true); setV2Screen('dashboard'); setView('pending') }}
+          onCancel={() => setV2Screen('providertype')} />
+      ) : v2Screen === 'onboarding' && regCategory ? (
+        <Onboarding navigate={setV2Screen}
+          category={regCategory.item} categoryGroup={regCategory.group}
+          countryCode={regCountry.code} countryName={regCountry.name}
+          userId={userId!}
+          onSubmitted={() => { setPendingKind('family'); setHasApplication(true); setV2Screen('dashboard'); setView('pending') }} />
+      ) : v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} />
         : v2Screen === 'ai' ? <AIHome navigate={setV2Screen} />
         : v2Screen === 'messages' ? <Messages navigate={setV2Screen} />
         : v2Screen === 'earnings' ? <Earnings navigate={setV2Screen} />

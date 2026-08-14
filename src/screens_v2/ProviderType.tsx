@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import type { Screen } from '../App'
 
-interface Props { navigate: (s: Screen) => void }
+// onContinue real -- the parent needs the actual chosen category/group to
+// route Healthcare selections into the real HealthcareWizard (different
+// backend table/fields entirely -- license, specialty, credentials) vs.
+// every other group into the real family-service Onboarding flow.
+interface Props { navigate: (s: Screen) => void; onContinue: (item: string, group: string) => void }
 
 const CATEGORIES = [
   {
@@ -43,7 +47,7 @@ const CATEGORIES = [
   },
 ]
 
-export default function ProviderType({ navigate }: Props) {
+export default function ProviderType({ navigate, onContinue }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
 
@@ -136,7 +140,7 @@ export default function ProviderType({ navigate }: Props) {
           </div>
         )}
         <button
-          onClick={() => selected && navigate('onboarding')}
+          onClick={() => selected && selectedGroup && onContinue(selected, selectedGroup)}
           style={{
             width: '100%', padding: '15.5px', borderRadius: 14, border: 'none', cursor: selected ? 'pointer' : 'not-allowed',
             background: selected

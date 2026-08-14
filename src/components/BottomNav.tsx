@@ -11,10 +11,16 @@ export default function BottomNav({ current, navigate }: Props) {
   return (
     <div style={{
       position: 'absolute', bottom: 0, left: 0, right: 0, height: 76,
-      background: 'rgba(255, 255, 255, 0.92)',
+      // Rich navy per feedback -- the spec calls for navy as "Premium dark
+      // surfaces... Headers" (mom-bestie-provider-spec.md §3), and a
+      // fully-white recolor had erased that entirely. Chrome that's
+      // visible on every screen (this bar) is the highest-leverage place
+      // to bring it back without re-flattening the white content areas
+      // the "more white" feedback asked for.
+      background: 'linear-gradient(180deg, #151F46 0%, #111A3A 100%)',
       backdropFilter: 'blur(28px)',
       WebkitBackdropFilter: 'blur(28px)',
-      borderTop: '1px solid rgba(17,26,58,0.09)',
+      borderTop: '1px solid rgba(255,255,255,0.08)',
       display: 'flex', alignItems: 'center', justifyContent: 'space-around',
       padding: '0 4px 10px',
       zIndex: 50,
@@ -41,7 +47,7 @@ export default function BottomNav({ current, navigate }: Props) {
         >
           <SparkleIco />
         </button>
-        <span style={{ fontSize: 9, fontFamily: 'Inter', fontWeight: 600, color: current === 'ai' ? '#246BFD' : 'rgba(17,26,58,0.4)', letterSpacing: 0.2 }}>AI</span>
+        <span style={{ fontSize: 9, fontFamily: 'Inter', fontWeight: 600, color: current === 'ai' ? '#5BAAFF' : 'rgba(255,255,255,0.45)', letterSpacing: 0.2 }}>AI</span>
       </div>
 
       <NavBtn icon={<ChatIco />} label="Messages" active={current === 'messages'} onClick={() => navigate('messages')} />
@@ -56,12 +62,12 @@ function NavBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
       background: 'none', border: 'none', cursor: 'pointer', flex: 1, padding: '6px 0',
     }}>
-      <div style={{ color: active ? '#246BFD' : 'rgba(17,26,58,0.38)', transition: 'color 0.2s' }}>
+      <div style={{ color: active ? '#5BAAFF' : 'rgba(255,255,255,0.45)', transition: 'color 0.2s' }}>
         {icon}
       </div>
       <span style={{
         fontSize: 9, fontFamily: 'Inter', fontWeight: active ? 600 : 400,
-        color: active ? '#246BFD' : 'rgba(17,26,58,0.38)',
+        color: active ? '#5BAAFF' : 'rgba(255,255,255,0.45)',
         letterSpacing: 0.2, transition: 'color 0.2s',
       }}>{label}</span>
     </button>

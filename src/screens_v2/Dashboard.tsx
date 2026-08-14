@@ -110,15 +110,18 @@ export default function Dashboard({ navigate, providerProfile }: Props) {
 
         {/* AI Morning Brief */}
         <div style={{ padding: '0 16px 16px' }}>
+          {/* Rich navy per feedback -- "AI surfaces" is one of the spec's
+              explicit navy use-cases (§3), and the light-tint version this
+              became after the mechanical recolor lost that entirely. */}
           <div style={{
             borderRadius: 20, padding: '18px 18px',
-            background: 'linear-gradient(135deg, rgba(36,107,253,0.2) 0%, rgba(168,85,247,0.1) 100%)',
-            backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-            border: '1px solid rgba(36,107,253,0.3)',
+            background: 'linear-gradient(135deg, #151F46 0%, #1B2550 55%, #2A1F5C 100%)',
+            border: '1px solid rgba(91,170,255,0.3)',
             position: 'relative', overflow: 'hidden',
+            boxShadow: '0 12px 32px rgba(17,26,58,0.25)',
           }}>
             {/* Glow bg */}
-            <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.25) 0%, transparent 70%)' }}/>
+            <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.35) 0%, transparent 70%)' }}/>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
               {/* Orb */}
               <div style={{
@@ -134,21 +137,21 @@ export default function Dashboard({ navigate, providerProfile }: Props) {
                     animation: 'pulseDot 2s ease-in-out infinite',
                   }}/>
                 </div>
-                <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(17,26,58,0.88)', margin: 0, lineHeight: 1.55 }}>
-                  "You have <strong style={{ color: '#246BFD' }}>3 bookings</strong> today, <strong style={{ color: '#246BFD' }}>2 unread messages</strong> and <strong style={{ color: '#10B981' }}>৳4,850</strong> available for payout."
+                <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.55 }}>
+                  "You have <strong style={{ color: '#5BAAFF' }}>3 bookings</strong> today, <strong style={{ color: '#5BAAFF' }}>2 unread messages</strong> and <strong style={{ color: '#4ADE80' }}>৳4,850</strong> available for payout."
                 </p>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 14, position: 'relative', zIndex: 1 }}>
               <button onClick={() => navigate('ai')} style={{
                 flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer',
-                background: 'rgba(36,107,253,0.35)', border: '1px solid rgba(36,107,253,0.5)',
+                background: 'rgba(36,107,253,0.45)', border: '1px solid rgba(91,170,255,0.5)',
                 fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: 'white',
               }}>✨ Ask AI</button>
               <button style={{
                 flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer',
-                background: 'rgba(17,26,58,0.1)', border: '1px solid rgba(17,26,58,0.15)',
-                fontFamily: 'Inter', fontSize: 13, fontWeight: 500, color: 'rgba(17,26,58,0.8)',
+                background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)',
+                fontFamily: 'Inter', fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)',
               }}>View My Day</button>
             </div>
           </div>

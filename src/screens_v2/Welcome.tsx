@@ -42,12 +42,18 @@ export default function Welcome({ navigate }: Props) {
       overflowY: 'auto', display: 'flex', flexDirection: 'column',
     }} className="scrollbar-hide">
 
-      {/* Hero */}
+      {/* Hero -- rich navy per feedback ("add more dark rich navy blue").
+          Spec (mom-bestie-provider-spec.md §3) calls navy out explicitly
+          for headers/premium surfaces; the mechanical "more white" pass
+          had flattened this along with everything else. Kept scoped to
+          the hero band -- the rest of the page (feature cards, CTAs)
+          stays white, per the same feedback's "keep it mostly white." */}
       <div style={{
-        padding: '60px 28px 28px',
-        background: 'linear-gradient(175deg, #EAF2FF 0%, #F7F9FF 60%, transparent 100%)',
-        position: 'relative',
+        padding: '60px 28px 32px',
+        background: 'linear-gradient(160deg, #0D1432 0%, #151F46 55%, #1B2550 100%)',
+        position: 'relative', overflow: 'hidden',
       }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(36,107,253,0.35) 0%, transparent 70%)', pointerEvents: 'none' }}/>
         {/* Orb small */}
         <div style={{
           position: 'absolute', top: 14, right: 24,
@@ -58,18 +64,18 @@ export default function Welcome({ navigate }: Props) {
 
         <div style={{
           fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 13, fontWeight: 600,
-          color: '#246BFD', letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14,
+          color: '#5BAAFF', letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14, position: 'relative',
         }}>MomBestie Provider</div>
 
         <h1 style={{
           fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 30, fontWeight: 800,
-          color: '#111A3A', lineHeight: 1.2, letterSpacing: '-0.5px', margin: 0,
+          color: 'white', lineHeight: 1.2, letterSpacing: '-0.5px', margin: 0, position: 'relative',
         }}>
           Turn your skills<br/>into opportunity.
         </h1>
         <p style={{
-          fontFamily: 'Inter, sans-serif', fontSize: 14.5, color: 'rgba(17,26,58,0.55)',
-          lineHeight: 1.6, marginTop: 12, marginBottom: 0,
+          fontFamily: 'Inter, sans-serif', fontSize: 14.5, color: 'rgba(255,255,255,0.65)',
+          lineHeight: 1.6, marginTop: 12, marginBottom: 0, position: 'relative',
         }}>
           Connect with families, manage your services, grow your reputation and run your business with the help of MomBestie AI.
         </p>
