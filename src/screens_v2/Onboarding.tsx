@@ -54,6 +54,100 @@ function payoutMethodsFor(countryCode: string): { name: string; icon: string; su
   ]
 }
 
+// Real per-country currency defaults for the Pricing step. Found and fixed
+// live: the price field was showing a hardcoded "$" for every country
+// (a UAE test registration showed "$" instead of AED). Rather than depend
+// on the `currency_symbol` prop threaded from the Supabase country_config
+// table (which isn't populated for every one of the 150+ countries yet),
+// this ships a real, complete country->currency mapping so the field
+// defaults correctly regardless of backend data completeness, and turns
+// the symbol into a real dropdown so the provider can pick a different
+// currency themselves if the default doesn't match how they want to quote
+// their rate.
+const CURRENCY_BY_COUNTRY: Record<string, string> = {
+  BD: 'BDT', US: 'USD', GB: 'GBP', CA: 'CAD', AU: 'AUD', IN: 'INR', PK: 'PKR',
+  AE: 'AED', SA: 'SAR', QA: 'QAR', JP: 'JPY', KR: 'KRW', SG: 'SGD', MY: 'MYR',
+  ID: 'IDR', PH: 'PHP', DE: 'EUR', FR: 'EUR', ES: 'EUR', IT: 'EUR', NL: 'EUR',
+  BE: 'EUR', SE: 'SEK', NO: 'NOK', DK: 'DKK', FI: 'EUR', CH: 'CHF', AT: 'EUR',
+  IE: 'EUR', PT: 'EUR', PL: 'PLN', GR: 'EUR', TR: 'TRY', ZA: 'ZAR', NG: 'NGN',
+  KE: 'KES', EG: 'EGP', MA: 'MAD', BR: 'BRL', MX: 'MXN', AR: 'ARS', CL: 'CLP',
+  CO: 'COP', CZ: 'CZK', RO: 'RON', HU: 'HUF', UA: 'UAH', RU: 'RUB', IL: 'ILS',
+  JO: 'JOD', KW: 'KWD', BH: 'BHD', OM: 'OMR', LB: 'LBP', IQ: 'IQD', IR: 'IRR',
+  NP: 'NPR', LK: 'LKR', MV: 'MVR', BT: 'BTN', MM: 'MMK', TH: 'THB', VN: 'VND',
+  KH: 'KHR', LA: 'LAK', BN: 'BND', TL: 'USD', NZ: 'NZD', PG: 'PGK', FJ: 'FJD',
+  TZ: 'TZS', UG: 'UGX', RW: 'RWF', ET: 'ETB', GH: 'GHS', SN: 'XOF', CI: 'XOF',
+  CM: 'XAF', TN: 'TND', LY: 'LYD', DZ: 'DZD', SD: 'SDG', SO: 'SOS', ZM: 'ZMW',
+  ZW: 'ZWL', BW: 'BWP', MZ: 'MZN', MG: 'MGA', MU: 'MUR', SC: 'SCR', UY: 'UYU',
+  PE: 'PEN', VE: 'VES', EC: 'USD', BO: 'BOB', PY: 'PYG', GY: 'GYD', SR: 'SRD',
+  BB: 'BBD', JM: 'JMD', TT: 'TTD', BS: 'BSD', CR: 'CRC', PA: 'PAB', GT: 'GTQ',
+  HN: 'HNL', SV: 'USD', NI: 'NIO', DO: 'DOP', CU: 'CUP', HT: 'HTG', IS: 'ISK',
+  LU: 'EUR', MT: 'EUR', CY: 'EUR', SK: 'EUR', SI: 'EUR', HR: 'EUR', BA: 'BAM',
+  RS: 'RSD', MK: 'MKD', AL: 'ALL', XK: 'EUR', ME: 'EUR', BG: 'BGN', MD: 'MDL',
+  BY: 'BYN', LT: 'EUR', LV: 'EUR', EE: 'EUR', KZ: 'KZT', UZ: 'UZS', AZ: 'AZN',
+  GE: 'GEL', AM: 'AMD', TM: 'TMT', KG: 'KGS', TJ: 'TJS', AF: 'AFN', YE: 'YER',
+  SY: 'SYP', PS: 'ILS',
+}
+const CURRENCIES: { code: string; symbol: string; name: string }[] = [
+  { code: 'USD', symbol: '$', name: 'US Dollar' }, { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' }, { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
+  { code: 'AFN', symbol: '؋', name: 'Afghan Afghani' }, { code: 'ALL', symbol: 'L', name: 'Albanian Lek' },
+  { code: 'AMD', symbol: '֏', name: 'Armenian Dram' }, { code: 'ARS', symbol: '$', name: 'Argentine Peso' },
+  { code: 'AUD', symbol: '$', name: 'Australian Dollar' }, { code: 'AZN', symbol: '₼', name: 'Azerbaijani Manat' },
+  { code: 'BAM', symbol: 'KM', name: 'Bosnia-Herzegovina Mark' }, { code: 'BBD', symbol: '$', name: 'Barbadian Dollar' },
+  { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' }, { code: 'BGN', symbol: 'лв', name: 'Bulgarian Lev' },
+  { code: 'BHD', symbol: 'BD', name: 'Bahraini Dinar' }, { code: 'BND', symbol: '$', name: 'Brunei Dollar' },
+  { code: 'BOB', symbol: 'Bs.', name: 'Bolivian Boliviano' }, { code: 'BSD', symbol: '$', name: 'Bahamian Dollar' },
+  { code: 'BTN', symbol: 'Nu.', name: 'Bhutanese Ngultrum' }, { code: 'BWP', symbol: 'P', name: 'Botswana Pula' },
+  { code: 'BYN', symbol: 'Br', name: 'Belarusian Ruble' }, { code: 'CAD', symbol: '$', name: 'Canadian Dollar' },
+  { code: 'CHF', symbol: 'Fr', name: 'Swiss Franc' }, { code: 'CLP', symbol: '$', name: 'Chilean Peso' },
+  { code: 'COP', symbol: '$', name: 'Colombian Peso' }, { code: 'CRC', symbol: '₡', name: 'Costa Rican Colón' },
+  { code: 'CUP', symbol: '$', name: 'Cuban Peso' }, { code: 'CZK', symbol: 'Kč', name: 'Czech Koruna' },
+  { code: 'DKK', symbol: 'kr', name: 'Danish Krone' }, { code: 'DOP', symbol: 'RD$', name: 'Dominican Peso' },
+  { code: 'DZD', symbol: 'د.ج', name: 'Algerian Dinar' }, { code: 'EGP', symbol: '£', name: 'Egyptian Pound' },
+  { code: 'ETB', symbol: 'Br', name: 'Ethiopian Birr' }, { code: 'FJD', symbol: '$', name: 'Fijian Dollar' },
+  { code: 'GEL', symbol: '₾', name: 'Georgian Lari' }, { code: 'GHS', symbol: '₵', name: 'Ghanaian Cedi' },
+  { code: 'GTQ', symbol: 'Q', name: 'Guatemalan Quetzal' }, { code: 'GYD', symbol: '$', name: 'Guyanese Dollar' },
+  { code: 'HNL', symbol: 'L', name: 'Honduran Lempira' }, { code: 'HTG', symbol: 'G', name: 'Haitian Gourde' },
+  { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' }, { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
+  { code: 'ILS', symbol: '₪', name: 'Israeli Shekel' }, { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'IQD', symbol: 'ع.د', name: 'Iraqi Dinar' }, { code: 'IRR', symbol: '﷼', name: 'Iranian Rial' },
+  { code: 'ISK', symbol: 'kr', name: 'Icelandic Króna' }, { code: 'JMD', symbol: '$', name: 'Jamaican Dollar' },
+  { code: 'JOD', symbol: 'JD', name: 'Jordanian Dinar' }, { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' }, { code: 'KGS', symbol: 'с', name: 'Kyrgyzstani Som' },
+  { code: 'KHR', symbol: '៛', name: 'Cambodian Riel' }, { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
+  { code: 'KWD', symbol: 'KD', name: 'Kuwaiti Dinar' }, { code: 'KZT', symbol: '₸', name: 'Kazakhstani Tenge' },
+  { code: 'LAK', symbol: '₭', name: 'Lao Kip' }, { code: 'LBP', symbol: 'ل.ل', name: 'Lebanese Pound' },
+  { code: 'LKR', symbol: '₨', name: 'Sri Lankan Rupee' }, { code: 'LYD', symbol: 'ل.د', name: 'Libyan Dinar' },
+  { code: 'MAD', symbol: 'DH', name: 'Moroccan Dirham' }, { code: 'MDL', symbol: 'L', name: 'Moldovan Leu' },
+  { code: 'MGA', symbol: 'Ar', name: 'Malagasy Ariary' }, { code: 'MKD', symbol: 'ден', name: 'Macedonian Denar' },
+  { code: 'MMK', symbol: 'K', name: 'Myanmar Kyat' }, { code: 'MUR', symbol: '₨', name: 'Mauritian Rupee' },
+  { code: 'MVR', symbol: 'ރ.', name: 'Maldivian Rufiyaa' }, { code: 'MXN', symbol: '$', name: 'Mexican Peso' },
+  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' }, { code: 'MZN', symbol: 'MT', name: 'Mozambican Metical' },
+  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' }, { code: 'NIO', symbol: 'C$', name: 'Nicaraguan Córdoba' },
+  { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' }, { code: 'NPR', symbol: '₨', name: 'Nepalese Rupee' },
+  { code: 'NZD', symbol: '$', name: 'New Zealand Dollar' }, { code: 'OMR', symbol: '﷼', name: 'Omani Rial' },
+  { code: 'PAB', symbol: 'B/.', name: 'Panamanian Balboa' }, { code: 'PEN', symbol: 'S/', name: 'Peruvian Sol' },
+  { code: 'PGK', symbol: 'K', name: 'Papua New Guinean Kina' }, { code: 'PHP', symbol: '₱', name: 'Philippine Peso' },
+  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee' }, { code: 'PLN', symbol: 'zł', name: 'Polish Złoty' },
+  { code: 'PYG', symbol: '₲', name: 'Paraguayan Guaraní' }, { code: 'QAR', symbol: '﷼', name: 'Qatari Riyal' },
+  { code: 'RON', symbol: 'lei', name: 'Romanian Leu' }, { code: 'RSD', symbol: 'дин.', name: 'Serbian Dinar' },
+  { code: 'RUB', symbol: '₽', name: 'Russian Ruble' }, { code: 'RWF', symbol: 'FRw', name: 'Rwandan Franc' },
+  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal' }, { code: 'SCR', symbol: '₨', name: 'Seychellois Rupee' },
+  { code: 'SDG', symbol: 'ج.س.', name: 'Sudanese Pound' }, { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+  { code: 'SGD', symbol: '$', name: 'Singapore Dollar' }, { code: 'SOS', symbol: 'S', name: 'Somali Shilling' },
+  { code: 'SRD', symbol: '$', name: 'Surinamese Dollar' }, { code: 'SYP', symbol: '£', name: 'Syrian Pound' },
+  { code: 'THB', symbol: '฿', name: 'Thai Baht' }, { code: 'TJS', symbol: 'ЅМ', name: 'Tajikistani Somoni' },
+  { code: 'TMT', symbol: 'm', name: 'Turkmenistan Manat' }, { code: 'TND', symbol: 'د.ت', name: 'Tunisian Dinar' },
+  { code: 'TRY', symbol: '₺', name: 'Turkish Lira' }, { code: 'TTD', symbol: '$', name: 'Trinidad & Tobago Dollar' },
+  { code: 'TZS', symbol: 'TSh', name: 'Tanzanian Shilling' }, { code: 'UAH', symbol: '₴', name: 'Ukrainian Hryvnia' },
+  { code: 'UGX', symbol: 'USh', name: 'Ugandan Shilling' }, { code: 'UYU', symbol: '$', name: 'Uruguayan Peso' },
+  { code: 'UZS', symbol: 'сўм', name: 'Uzbekistani Som' }, { code: 'VES', symbol: 'Bs.', name: 'Venezuelan Bolívar' },
+  { code: 'VND', symbol: '₫', name: 'Vietnamese Dong' }, { code: 'XAF', symbol: 'FCFA', name: 'Central African CFA Franc' },
+  { code: 'XOF', symbol: 'CFA', name: 'West African CFA Franc' }, { code: 'YER', symbol: '﷼', name: 'Yemeni Rial' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand' }, { code: 'ZMW', symbol: 'K', name: 'Zambian Kwacha' },
+  { code: 'ZWL', symbol: '$', name: 'Zimbabwean Dollar' },
+]
+
 /**
  * Real family-service provider registration -- replaces the prototype
  * version, which had exactly one (of ~15) fields wired to state (`bio`)
@@ -89,8 +183,12 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
   const [serviceCity, setServiceCity] = useState('')
   const [serviceRadius, setServiceRadius] = useState('10 km')
 
-  // Pricing
+  // Pricing -- defaults to the real currency for the provider's registered
+  // country (see CURRENCY_BY_COUNTRY above), but is a real dropdown so the
+  // provider can pick a different one if they want to quote in something else.
   const [hourlyRate, setHourlyRate] = useState('')
+  const [currency, setCurrency] = useState(CURRENCY_BY_COUNTRY[countryCode] ?? 'USD')
+  const selectedCurrency = CURRENCIES.find(c => c.code === currency) ?? { code: currency, symbol: currencySymbol || '$', name: currency }
 
   // Availability
   const [selectedDays, setSelectedDays] = useState<Set<string>>(new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']))
@@ -406,9 +504,26 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
             </div>
 
             <label style={labelStyle}>Price per Hour</label>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ padding: '13px 14px', background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.1)', borderRight: 'none', borderRadius: '12px 0 0 12px', fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 700, color: '#10B981' }}>{currencySymbol}</div>
+            <div style={{ display: 'flex', alignItems: 'stretch' }}>
+              <select
+                value={currency}
+                onChange={e => setCurrency(e.target.value)}
+                title={selectedCurrency.name}
+                style={{
+                  padding: '0 10px', background: 'rgba(17,26,58,0.05)', border: '1px solid rgba(17,26,58,0.13)',
+                  borderRight: 'none', borderRadius: '12px 0 0 12px', fontFamily: 'Plus Jakarta Sans', fontSize: 15,
+                  fontWeight: 700, color: '#10B981', outline: 'none', cursor: 'pointer', appearance: 'none' as const,
+                  flexShrink: 0, width: 92,
+                }}
+              >
+                {CURRENCIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>
+                ))}
+              </select>
               <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="700" style={{ ...inputStyle, borderRadius: '0 12px 12px 0', flex: 1 }}/>
+            </div>
+            <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.35)', marginTop: 6 }}>
+              Defaulted to {selectedCurrency.name} ({selectedCurrency.code}) based on {countryName} -- change it above if you'd rather quote in a different currency.
             </div>
           </div>
         )}
@@ -503,7 +618,7 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
               { title: 'About', items: [`${firstName} ${lastName}`.trim() || '—', phone || '—', `${countryName}`, Array.from(languages).join(', ') || '—'] },
               { title: 'Service', items: [`${category} · ${categoryGroup}`] },
               { title: 'Service Area', items: [serviceCity || '—', serviceRadius] },
-              { title: 'Pricing', items: [hourlyRate ? `${currencySymbol}${hourlyRate}/hr` : '—'] },
+              { title: 'Pricing', items: [hourlyRate ? `${selectedCurrency.symbol}${hourlyRate} ${selectedCurrency.code}/hr` : '—'] },
               { title: 'Availability', items: [Array.from(selectedDays).join(', ') || 'None selected'] },
               { title: 'Verification', items: [`ID: ${idUploaded ? 'Yes' : 'Pending'}`, `Background check: ${backgroundCheckConsent ? 'Consented' : 'Pending'}`, `Certifications: ${certifications ? 'Yes' : 'None'}`] },
               { title: 'Payout', items: [payoutMethod ?? 'Not selected'] },
