@@ -12,7 +12,7 @@
  */
 import { supabase } from "./supabaseClient";
 
-export type TransactionType = "subscription" | "marketplace_booking" | "provider_registration_fee" | "website";
+export type TransactionType = "subscription" | "marketplace_booking" | "provider_registration_fee" | "website" | "provider_payout";
 export type Platform = "ios" | "android" | "web";
 
 export interface EligiblePaymentMethod {

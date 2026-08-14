@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getCurrentUser, signOut, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication, listCountries, type CountryFee } from './services'
+import { getCurrentUser, signOut, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication, listCountries, type CountryFee, getEligiblePaymentMethods, type EligiblePaymentMethod } from './services'
 import { AuthGate } from './screens/AuthGate'
 import { ProviderTypeChoice } from './screens/ProviderTypeChoice'
 import { HealthcareWizard } from './screens/HealthcareWizard'
@@ -397,6 +397,49 @@ function Card({ title, compact, children }: { title?: string; compact?: boolean;
   )
 }
 
+// Real, country-aware payout methods for the Earnings screen -- replaces
+// a hardcoded "requires Stripe Connect" line that assumed every provider
+// worldwide uses the same US-centric processor. Uses the same centralized
+// eligibility engine as the registration-fee flow (docs/ARCHITECTURE.md
+// §15), just with transaction_type='provider_payout'. No "connect"
+// button here -- payouts are written by a trusted service-role process
+// only (provider_payouts table), so there's no real client action to
+// wire yet; this is an honest "here's what's eligible" status, not a
+// working connect flow.
+function PayoutMethodsCard({ countryCode, countries }: { countryCode: string | null; countries: CountryFee[] }) {
+  const [methods, setMethods] = useState<EligiblePaymentMethod[] | null>(null)
+  const country = countries.find(c => c.country_code === countryCode)
+
+  useEffect(() => {
+    if (!countryCode || !country) { setMethods(null); return }
+    let cancelled = false
+    getEligiblePaymentMethods(countryCode, country.currency, 'provider_payout').then(m => { if (!cancelled) setMethods(m) })
+    return () => { cancelled = true }
+  }, [countryCode, country?.currency])
+
+  return (
+    <Card title="Payout methods">
+      {!countryCode ? (
+        <p className="text-sm text-[#6E6E73]">Complete your provider registration to see payout methods for your country.</p>
+      ) : methods === null ? (
+        <p className="text-sm text-[#6E6E73]">Loading…</p>
+      ) : methods.length === 0 ? (
+        <p className="text-sm text-[#6E6E73]">No payout method is enabled for {country?.country_name ?? countryCode} yet. MomBestie is rolling out payout providers by country -- see Settings → Contact Support for status.</p>
+      ) : (
+        <div className="space-y-2">
+          {methods.map(m => (
+            <div key={m.provider_code} className="flex items-center justify-between px-3 py-2.5 rounded-xl" style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
+              <span className="text-sm font-semibold text-[#242424]">{m.display_name}</span>
+              <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${m.mode === 'live' ? 'bg-[#E8F5EE] text-[#55A67A]' : 'bg-[#FEF3CD] text-[#B8860B]'}`}>{m.mode}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="text-[11px] text-[#6E6E73] mt-3">Payout options come from your country's configuration, same eligibility engine as your registration fee -- never hardcoded to one processor.</p>
+    </Card>
+  )
+}
+
 type View = 'loading' | 'auth' | 'choose-type' | 'onboarding-family' | 'onboarding-healthcare' | 'pending' | 'dashboard'
 
 export default function App() {
@@ -412,6 +455,9 @@ export default function App() {
   const [pendingKind, setPendingKind] = useState<'family' | 'healthcare'>('family')
   const [nav, setNav] = useState<NavId>('overview')
   const [bookings, setBookings] = useState(INITIAL_BOOKINGS)
+  const [providerCountry, setProviderCountry] = useState<string | null>(null)
+  const [countries, setCountries] = useState<CountryFee[]>([])
+  useEffect(() => { listCountries().then(setCountries) }, [])
 
   // Real dark mode -- device-level preference (not per-account), persisted
   // across sessions, same as most native apps. See index.css for the
@@ -427,6 +473,7 @@ export default function App() {
   const routeAfterAuth = async (uid: string) => {
     setUserId(uid)
     const [familyApp, healthcareApp] = await Promise.all([getMyProviderApplication(uid), getMyHealthcareApplication(uid)])
+    setProviderCountry(familyApp?.country ?? healthcareApp?.country ?? null)
     if (familyApp && familyApp.status !== 'approved') { setPendingKind('family'); setHasApplication(true); setView('pending'); return }
     if (healthcareApp && healthcareApp.status !== 'approved') { setPendingKind('healthcare'); setHasApplication(true); setView('pending'); return }
     setHasApplication(Boolean(familyApp || healthcareApp))
@@ -605,10 +652,7 @@ export default function App() {
               <Card compact title={`Fee (${COMMISSION_PCT}%)`}><p className="font-display text-lg text-[#242424]">-${commission.toFixed(2)}</p></Card>
               <Card compact title="Net"><p className="font-display text-lg text-[#55A67A]">${(totalEarned - commission).toFixed(2)}</p></Card>
             </div>
-            <Card title="Payout method">
-              <p className="text-sm text-[#6E6E73]">No payout method connected yet. Real payouts require a Stripe Connect (or equivalent) account — see docs/ARCHITECTURE.md §9.</p>
-              <button className="action-btn bg-[#FFD6C9] text-[#C94930] text-sm font-semibold px-5 py-2.5 rounded-xl mt-3">Connect Payout Method</button>
-            </Card>
+            <PayoutMethodsCard countryCode={providerCountry} countries={countries} />
           </div>
         )}
 
