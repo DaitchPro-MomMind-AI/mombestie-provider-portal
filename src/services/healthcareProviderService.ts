@@ -56,6 +56,42 @@ export async function getMyHealthcareApplication(userId: string): Promise<Health
 
 export async function submitHealthcareApplication(app: NewHealthcareApplication): Promise<{ ok: boolean; error?: string }> {
   if (!supabase) return { ok: false, error: "Backend not configured." };
+
+  // Real bug found live: `healthcare_providers.user_id` is unique (one
+  // application per person), but this always did a plain insert -- so
+  // anyone submitting a second time (retrying after an error, or
+  // resubmitting after a rejection) hit a raw
+  // "duplicate key value violates unique constraint" straight from
+  // Postgres instead of it working. The RLS policy
+  // "owner can update their own draft/rejected application" already
+  // anticipates this (see migration 20260812000009) -- the client just
+  // never implemented the update path to match it. Look up any existing
+  // row first: update it if it's still editable (draft/rejected), insert
+  // fresh if there's none, and surface a real, readable message instead
+  // of a DB error if it's already submitted/approved/etc and genuinely
+  // shouldn't be overwritten.
+  const { data: existing, error: lookupError } = await supabase
+    .from("healthcare_providers")
+    .select("id,status")
+    .eq("user_id", app.user_id)
+    .maybeSingle();
+  if (lookupError) return { ok: false, error: lookupError.message };
+
+  if (existing) {
+    if (existing.status === "draft" || existing.status === "rejected") {
+      const { error } = await supabase
+        .from("healthcare_providers")
+        .update({ ...app, status: "submitted" })
+        .eq("id", existing.id);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true };
+    }
+    return {
+      ok: false,
+      error: `You already have a healthcare application on file (status: ${existing.status}). Contact MomBestie support if you need to change it.`,
+    };
+  }
+
   const { error } = await supabase.from("healthcare_providers").insert({ ...app, status: "submitted" });
   if (error) return { ok: false, error: error.message };
   return { ok: true };
