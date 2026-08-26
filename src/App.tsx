@@ -511,6 +511,11 @@ export default function App() {
   // "demo data must be clearly separated from production"). Falls back to
   // an honest "no profile yet" state rather than a fake name.
   const [providerProfile, setProviderProfile] = useState<{ name: string; city: string | null; status: string; verified: boolean } | null>(null)
+  // Real `providers.id` for the signed-in family-service provider -- needed
+  // to query/decide their real rows in the shared `bookings` table (Bookings
+  // screen). Null for healthcare providers (a separate table, no bookings
+  // integration yet) or anyone with no application.
+  const [providerId, setProviderId] = useState<string | null>(null)
 
   // v2 design screen navigation -- separate from the real `view` state
   // machine above. `view` decides WHICH real flow you're in (auth vs.
@@ -544,10 +549,13 @@ export default function App() {
     setProviderCountry(familyApp?.country ?? healthcareApp?.country ?? null)
     if (familyApp) {
       setProviderProfile({ name: familyApp.business_name || familyApp.full_name, city: familyApp.service_city, status: familyApp.status, verified: familyApp.status === 'approved' })
+      setProviderId(familyApp.id)
     } else if (healthcareApp) {
       setProviderProfile({ name: healthcareApp.practice_name || healthcareApp.legal_name, city: healthcareApp.service_city, status: healthcareApp.status, verified: healthcareApp.status === 'approved' })
+      setProviderId(null)
     } else {
       setProviderProfile(null)
+      setProviderId(null)
     }
     if (familyApp && familyApp.status !== 'approved') { setPendingKind('family'); setHasApplication(true); setView('pending'); return }
     if (healthcareApp && healthcareApp.status !== 'approved') { setPendingKind('healthcare'); setHasApplication(true); setView('pending'); return }
@@ -703,7 +711,7 @@ export default function App() {
           currencySymbol={countries.find(c => c.country_code === regCountry.code)?.currency_symbol ?? '$'}
           userId={userId!}
           onSubmitted={() => { setPendingKind('family'); setHasApplication(true); setV2Screen('dashboard'); setView('pending') }} />
-      ) : v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} />
+      ) : v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} providerId={providerId} />
         : v2Screen === 'ai' ? <AIHome navigate={setV2Screen} />
         : v2Screen === 'messages' ? <Messages navigate={setV2Screen} />
         : v2Screen === 'earnings' ? <Earnings navigate={setV2Screen} />

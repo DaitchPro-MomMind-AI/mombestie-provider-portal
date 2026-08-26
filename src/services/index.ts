@@ -4,3 +4,4 @@ export * from "./providerService";
 export * from "./healthcareProviderService";
 export * from "./paymentService";
 export * from "./countryConfigService";
+export * from "./bookingService";
