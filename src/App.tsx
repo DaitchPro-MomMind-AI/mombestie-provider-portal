@@ -586,6 +586,14 @@ export default function App() {
     await signOut()
     setUserId(null)
     setHasApplication(false)
+    // MBPRV-26: clear cached provider identity/profile too, not just the
+    // auth/application flags -- otherwise a stale providerId/providerProfile
+    // from the just-signed-out account stays in memory (and would be
+    // visible if a component re-renders before the view fully switches, or
+    // briefly reused if a different account signs in right after).
+    setProviderProfile(null)
+    setProviderId(null)
+    setProviderCountry(null)
     setV2Screen('welcome')
     setView('auth')
   }
