@@ -89,11 +89,24 @@ export default function SmartPricing({ navigate }: Props) {
 
           {/* Dhaka context */}
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10,
+            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, marginBottom: 12,
             background: 'rgba(17,26,58,0.06)', border: '1px solid rgba(17,26,58,0.08)', width: 'fit-content',
           }}>
             <FlagIcon code="BD" width={18} radius={3}/>
             <span style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.6)' }}>Dhaka, Bangladesh · BDT ৳</span>
+          </div>
+
+          {/* MBPRV-57/58: no real price_proposals row or real anonymized
+              booking-price benchmark backs any number on this screen --
+              both need real schema/RPC access this workspace doesn't have.
+              Honest disclosure rather than presenting these as real. */}
+          <div style={{
+            padding: '10px 14px', borderRadius: 12,
+            background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)',
+          }}>
+            <p style={{ fontFamily: 'Inter', fontSize: 11.5, fontWeight: 600, color: '#B8860B', margin: 0 }}>
+              ⚠ Not connected yet -- prices, confidence, and market range below are illustrative demo values, not derived from a real pricing model or real bookings data.
+            </p>
           </div>
         </div>
 
@@ -230,7 +243,7 @@ export default function SmartPricing({ navigate }: Props) {
                   background: 'linear-gradient(135deg, #246BFD, #28A8FF)',
                   boxShadow: '0 6px 20px rgba(36,107,253,0.4)',
                   fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'white',
-                }}>Use Recommended ({service.currency}{service.aiPrice}/hr)</button>
+                }}>Preview Recommended ({service.currency}{service.aiPrice}/hr)</button>
                 <button style={{
                   flex: 1, padding: '13px', borderRadius: 13, cursor: 'pointer',
                   background: 'rgba(17,26,58,0.07)', border: '1px solid rgba(17,26,58,0.12)',
@@ -247,8 +260,8 @@ export default function SmartPricing({ navigate }: Props) {
                   <svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M1 5.5l4 4.5L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: '#10B981' }}>Price Updated</div>
-                  <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 2 }}>Your marketplace listing has been updated.</div>
+                  <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: '#10B981' }}>Selected (preview only)</div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 2 }}>Not connected yet -- this doesn't write a real price change to your marketplace listing.</div>
                 </div>
               </div>
             )}

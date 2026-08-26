@@ -65,8 +65,22 @@ export default function MarketInsights({ navigate }: Props) {
             </button>
           </div>
           <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', marginBottom: 4 }}>Market Insights</div>
-          <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.4)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.4)', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
             Local demand data for Dhaka, Bangladesh <FlagIcon code="BD" width={16} radius={2}/>
+          </div>
+
+          {/* MBPRV-60: no real anonymized booking-request-volume aggregate
+              backs this chart/these stats/these insight cards yet -- needs a
+              real cross-provider aggregate RPC (like the payment-eligibility
+              engine has) that doesn't exist in this workspace. Honest
+              disclosure rather than presenting fixture numbers as real. */}
+          <div style={{
+            padding: '10px 14px', borderRadius: 12,
+            background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)',
+          }}>
+            <p style={{ fontFamily: 'Inter', fontSize: 11.5, fontWeight: 600, color: '#B8860B', margin: 0 }}>
+              ⚠ Not connected yet -- the chart, stats, and insight cards below are illustrative demo values, not derived from real booking-request data.
+            </p>
           </div>
         </div>
 
@@ -186,7 +200,7 @@ export default function MarketInsights({ navigate }: Props) {
             background: 'rgba(17,26,58,0.03)', border: '1px solid rgba(17,26,58,0.06)',
             fontFamily: 'Inter', fontSize: 11.5, color: 'rgba(17,26,58,0.28)', lineHeight: 1.5,
           }}>
-            Market insights are based on authorized marketplace activity data. No guaranteed income claims. Patterns may vary. AI insights are advisory only.
+            These market insights are demo/illustrative values, not yet based on real marketplace activity data (see the notice above). No guaranteed income claims. Once connected, patterns may vary and any AI insight would remain advisory only.
           </div>
         </div>
       </div>
