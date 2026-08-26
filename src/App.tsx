@@ -726,7 +726,7 @@ export default function App() {
         : v2Screen === 'marketinsights' ? <MarketInsights navigate={setV2Screen} />
         : v2Screen === 'healthcare' ? <HealthcareV2 navigate={setV2Screen} />
         : v2Screen === 'support' ? <Support navigate={setV2Screen} />
-        : <Dashboard navigate={setV2Screen} providerProfile={v2ProviderProfile} />
+        : <Dashboard navigate={setV2Screen} providerProfile={v2ProviderProfile} providerId={providerId} />
       }
     </PhoneShell>
   )

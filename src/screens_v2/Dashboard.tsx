@@ -1,46 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BottomNav from '../components/BottomNav'
 import type { Screen } from '../App'
+import { listMyBookings, type ProviderBooking } from '../services'
 
 // providerProfile real (see App.tsx routeAfterAuth) -- replaces the
-// prototype's hardcoded "Ayesha Rahman / AR". METRICS/TIMELINE below are
-// still prototype fixture numbers, not yet wired to real bookings data;
-// flagged rather than silently left in, see docs/PROJECT_REPORT.md.
-interface Props { navigate: (s: Screen) => void; providerProfile: { name: string; city: string | null; verified: boolean } | null }
+// prototype's hardcoded "Ayesha Rahman / AR". MBPRV-28: METRICS and
+// TIMELINE below are now computed from real `bookings` rows
+// (bookingService.listMyBookings), not the prior hardcoded fixture
+// numbers. Messages/Rating/Profile Views have no real backend yet (no
+// `messages`/`reviews` table, no view-tracking) -- those cards show an
+// honest "Not tracked yet" rather than an invented count.
+interface Props {
+  navigate: (s: Screen) => void
+  providerProfile: { name: string; city: string | null; verified: boolean } | null
+  providerId: string | null
+}
 
-const METRICS = [
-  { label: "Today's Bookings", value: '3', icon: '📅', color: '#246BFD', bg: 'rgba(36,107,253,0.15)', screen: 'bookings' },
-  { label: 'New Requests', value: '2', icon: '🔔', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', screen: 'bookings' },
-  { label: 'Messages', value: '2', icon: '💬', color: '#28A8FF', bg: 'rgba(40,168,255,0.12)', screen: 'messages' },
-  { label: 'Balance', value: '৳4,850', icon: '💰', color: '#10B981', bg: 'rgba(16,185,129,0.12)', screen: 'earnings' },
-  { label: 'Rating', value: '4.9★', icon: '⭐', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', screen: 'reviews' },
-  { label: 'Profile Views', value: '48', icon: '👁', color: '#A855F7', bg: 'rgba(168,85,247,0.12)', screen: 'profile' },
-]
+function moneyStr(cents: number, currency: string) {
+  return `${currency} ${(cents / 100).toFixed(0)}`
+}
 
-const TIMELINE = [
-  {
-    time: '9:00 AM', customer: 'Sarah K.', service: 'Babysitting',
-    duration: '4 hrs', price: '৳2,800', net: '৳2,380', status: 'upcoming', color: '#246BFD',
-    avatar: 'SK',
-  },
-  {
-    time: '12:30 PM', customer: 'Ahmed F.', service: 'Childcare',
-    duration: '3 hrs', price: '৳2,100', net: '৳1,785', status: 'in-progress', color: '#10B981',
-    avatar: 'AF',
-  },
-  {
-    time: '3:00 PM', customer: 'Nadia H.', service: 'Newborn Care',
-    duration: '2 hrs', price: '৳4,200', net: '৳3,570', status: 'upcoming', color: '#246BFD',
-    avatar: 'NH',
-  },
-]
+function isToday(iso: string) {
+  const d = new Date(iso)
+  const now = new Date()
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+}
 
-export default function Dashboard({ navigate, providerProfile }: Props) {
+const STATUS_LABEL: Record<ProviderBooking['status'], string> = {
+  draft: 'Draft', requested: 'Requested', accepted: 'Upcoming', declined: 'Declined',
+  confirmed: 'Upcoming', in_progress: 'In Progress', completed: 'Completed',
+  paid_out: 'Completed', cancelled: 'Cancelled', disputed: 'Disputed',
+}
+
+export default function Dashboard({ navigate, providerProfile, providerId }: Props) {
   const [aiThinking, setAiThinking] = useState(false)
+  const [bookings, setBookings] = useState<ProviderBooking[]>([])
+  const [loading, setLoading] = useState(true)
   const initials = (providerProfile?.name ?? '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
   const firstName = providerProfile?.name?.split(' ')[0] || 'there'
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+
+  useEffect(() => {
+    if (!providerId) { setBookings([]); setLoading(false); return }
+    setLoading(true)
+    listMyBookings(providerId).then(rows => { setBookings(rows); setLoading(false) })
+  }, [providerId])
+
+  const todaysBookings = useMemo(
+    () => bookings.filter(b => isToday(b.scheduled_at) && !['cancelled', 'declined', 'draft'].includes(b.status)),
+    [bookings],
+  )
+  const newRequests = useMemo(() => bookings.filter(b => b.status === 'requested').length, [bookings])
+  const completedBookings = useMemo(() => bookings.filter(b => b.status === 'completed' || b.status === 'paid_out'), [bookings])
+  const balanceCurrency = completedBookings[0]?.currency ?? bookings[0]?.currency ?? null
+  const balanceCents = completedBookings.reduce((s, b) => s + (b.price_cents - b.commission_cents), 0)
+
+  const METRICS: { label: string; value: string; icon: string; color: string; bg: string; screen: Screen }[] = [
+    { label: "Today's Bookings", value: loading ? '…' : String(todaysBookings.length), icon: '📅', color: '#246BFD', bg: 'rgba(36,107,253,0.15)', screen: 'bookings' },
+    { label: 'New Requests', value: loading ? '…' : String(newRequests), icon: '🔔', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', screen: 'bookings' },
+    { label: 'Messages', value: 'Not tracked yet', icon: '💬', color: '#28A8FF', bg: 'rgba(40,168,255,0.12)', screen: 'messages' },
+    { label: 'Balance', value: loading ? '…' : balanceCurrency ? moneyStr(balanceCents, balanceCurrency) : 'No earnings yet', icon: '💰', color: '#10B981', bg: 'rgba(16,185,129,0.12)', screen: 'earnings' },
+    { label: 'Rating', value: 'Not tracked yet', icon: '⭐', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', screen: 'reviews' },
+    { label: 'Profile Views', value: 'Not tracked yet', icon: '👁', color: '#A855F7', bg: 'rgba(168,85,247,0.12)', screen: 'profile' },
+  ]
 
   return (
     <div style={{ height: '100%', background: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
@@ -137,8 +160,13 @@ export default function Dashboard({ navigate, providerProfile }: Props) {
                     animation: 'pulseDot 2s ease-in-out infinite',
                   }}/>
                 </div>
+                {/* MBPRV-28: real counts (todaysBookings/balance), not the
+                    prior hardcoded "3 bookings / 2 unread messages / ৳4,850" --
+                    messages dropped entirely since no real messaging backend
+                    exists yet (see [MBPRV-49]), rather than keep a fake count. */}
                 <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.55 }}>
-                  "You have <strong style={{ color: '#5BAAFF' }}>3 bookings</strong> today, <strong style={{ color: '#5BAAFF' }}>2 unread messages</strong> and <strong style={{ color: '#4ADE80' }}>৳4,850</strong> available for payout."
+                  "You have <strong style={{ color: '#5BAAFF' }}>{loading ? '…' : todaysBookings.length} booking{todaysBookings.length === 1 ? '' : 's'}</strong> today
+                  {balanceCurrency && <> and <strong style={{ color: '#4ADE80' }}>{moneyStr(balanceCents, balanceCurrency)}</strong> available for payout</>}."
                 </p>
               </div>
             </div>
@@ -173,7 +201,7 @@ export default function Dashboard({ navigate, providerProfile }: Props) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 15, margin: '0 auto 8px',
                 }}>{m.icon}</div>
-                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 800, color: m.color }}>{m.value}</div>
+                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: m.value.length > 6 ? 10.5 : 15, fontWeight: 800, color: m.color, lineHeight: 1.25 }}>{m.value}</div>
                 <div style={{ fontFamily: 'Inter', fontSize: 9.5, color: 'rgba(17,26,58,0.38)', marginTop: 3, lineHeight: 1.3 }}>{m.label}</div>
               </div>
             ))}
@@ -204,28 +232,36 @@ export default function Dashboard({ navigate, providerProfile }: Props) {
             <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: 'rgba(17,26,58,0.7)' }}>Today's Timeline</div>
             <button onClick={() => navigate('bookings')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter', fontSize: 12, color: '#246BFD' }}>View all</button>
           </div>
+          {loading ? (
+            <p style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.4)', textAlign: 'center', padding: '20px 0' }}>Loading…</p>
+          ) : todaysBookings.length === 0 ? (
+            <p style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.4)', textAlign: 'center', padding: '20px 0' }}>No real bookings scheduled for today.</p>
+          ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {TIMELINE.map((t, i) => (
-              <div key={i} style={{
+            {todaysBookings.map(b => {
+              const inProgress = b.status === 'in_progress'
+              const color = inProgress ? '#10B981' : '#246BFD'
+              return (
+              <div key={b.id} style={{
                 display: 'flex', gap: 12, padding: '14px 14px', borderRadius: 16,
                 background: 'rgba(17,26,58,0.05)',
-                border: t.status === 'in-progress' ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(17,26,58,0.08)',
+                border: inProgress ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(17,26,58,0.08)',
               }}>
-                {/* Avatar */}
+                {/* Avatar -- real table has no customer name, only household_id (MBPRV-34) */}
                 <div style={{
                   width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
-                  background: `${t.color}20`, border: `1.5px solid ${t.color}40`,
+                  background: `${color}20`, border: `1.5px solid ${color}40`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color: t.color,
-                }}>{t.avatar}</div>
+                  fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 700, color,
+                }}>{b.household_id.slice(0, 2).toUpperCase()}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>{t.customer}</div>
-                      <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 2 }}>{t.service} · {t.duration}</div>
+                      <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#111A3A' }}>Household #{b.household_id.slice(0, 8)}</div>
+                      <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 2 }}>{b.service_category} · {b.duration_hours} hrs</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#10B981' }}>{t.net}</div>
+                      <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 14, fontWeight: 700, color: '#10B981' }}>{moneyStr(b.price_cents - b.commission_cents, b.currency)}</div>
                       <div style={{ fontFamily: 'Inter', fontSize: 10, color: 'rgba(17,26,58,0.35)', marginTop: 2 }}>net</div>
                     </div>
                   </div>
@@ -233,20 +269,24 @@ export default function Dashboard({ navigate, providerProfile }: Props) {
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: 5,
                       padding: '3px 9px', borderRadius: 20,
-                      background: t.status === 'in-progress' ? 'rgba(16,185,129,0.15)' : 'rgba(36,107,253,0.12)',
-                      border: `1px solid ${t.status === 'in-progress' ? 'rgba(16,185,129,0.3)' : 'rgba(36,107,253,0.25)'}` as string,
+                      background: inProgress ? 'rgba(16,185,129,0.15)' : 'rgba(36,107,253,0.12)',
+                      border: `1px solid ${inProgress ? 'rgba(16,185,129,0.3)' : 'rgba(36,107,253,0.25)'}` as string,
                     }}>
-                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: t.status === 'in-progress' ? '#10B981' : '#246BFD' }}/>
-                      <span style={{ fontFamily: 'Inter', fontSize: 10.5, fontWeight: 500, color: t.status === 'in-progress' ? '#10B981' : '#246BFD' }}>
-                        {t.status === 'in-progress' ? 'In Progress' : 'Upcoming'}
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: color }}/>
+                      <span style={{ fontFamily: 'Inter', fontSize: 10.5, fontWeight: 500, color }}>
+                        {STATUS_LABEL[b.status]}
                       </span>
                     </div>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(17,26,58,0.4)' }}>{t.time}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'rgba(17,26,58,0.4)' }}>
+                      {new Date(b.scheduled_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                    </span>
                   </div>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
+          )}
         </div>
 
         {/* AI Market Insight */}
