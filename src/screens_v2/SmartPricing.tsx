@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import BottomNav from '../components/BottomNav'
 import type { Screen } from '../App'
+import FlagIcon from '../components/FlagIcon'
 
 interface Props { navigate: (s: Screen) => void }
 
@@ -91,7 +92,7 @@ export default function SmartPricing({ navigate }: Props) {
             display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10,
             background: 'rgba(17,26,58,0.06)', border: '1px solid rgba(17,26,58,0.08)', width: 'fit-content',
           }}>
-            <span>🇧🇩</span>
+            <FlagIcon code="BD" width={18} radius={3}/>
             <span style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.6)' }}>Dhaka, Bangladesh · BDT ৳</span>
           </div>
         </div>

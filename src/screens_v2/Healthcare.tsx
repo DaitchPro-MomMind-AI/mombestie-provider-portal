@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Screen } from '../App'
+import FlagIcon from '../components/FlagIcon'
 
 interface Props { navigate: (s: Screen) => void }
 
@@ -206,7 +207,7 @@ export default function Healthcare({ navigate }: Props) {
                 <div style={{
                   ...inputStyle, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
                 }}>
-                  <span>🇧🇩</span>
+                  <FlagIcon code="BD" width={20} radius={3}/>
                   <span>Bangladesh Medical and Dental Council (BMDC)</span>
                 </div>
               </div>

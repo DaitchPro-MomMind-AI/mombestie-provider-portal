@@ -1,5 +1,6 @@
 import type { Screen } from '../App'
 import BottomNav from '../components/BottomNav'
+import FlagIcon from '../components/FlagIcon'
 
 // onSignOut real -- added directly here per feedback: Sign Out itself was
 // never broken (verified live: it does clear the real session), but it
@@ -59,7 +60,9 @@ export default function More({ navigate, onSignOut }: Props) {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 15, fontWeight: 800, color: '#111A3A' }}>Ayesha Rahman</div>
-              <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 2 }}>Babysitter · Dhaka 🇧🇩 · BDT ৳</div>
+              <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
+                Babysitter · Dhaka <FlagIcon code="BD" width={14} radius={2}/> · BDT ৳
+              </div>
               <div style={{ display: 'flex', gap: 6, marginTop: 7 }}>
                 <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#10B981' }}>✓ Verified</div>
                 <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#F59E0B' }}>⭐ 4.9</div>

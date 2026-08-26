@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import BottomNav from '../components/BottomNav'
 import type { Screen } from '../App'
+import FlagIcon from '../components/FlagIcon'
 
 // onSignOut real, per the file-header comment. Every other item in this
 // screen (personal info, business hours, payment methods list,
@@ -14,7 +15,7 @@ interface SettingItem {
   label: string
   sub?: string
   active?: boolean
-  flag?: string
+  flagCode?: string
   toggle?: boolean
   on?: boolean
   danger?: boolean
@@ -44,7 +45,7 @@ const SECTIONS: { title: string; items: SettingItem[] }[] = [
   {
     title: 'Language & Region',
     items: [
-      { icon: '🌍', label: 'Operating Country', sub: 'Bangladesh', flag: '🇧🇩' },
+      { icon: '🌍', label: 'Operating Country', sub: 'Bangladesh', flagCode: 'BD' },
       { icon: '🌐', label: 'Language', sub: 'বাংলা (Bengali)' },
       { icon: '💱', label: 'Currency', sub: 'BDT · ৳ Bangladesh Taka' },
       { icon: '🕐', label: 'Time Zone', sub: 'Asia/Dhaka (GMT+6)' },
@@ -128,7 +129,9 @@ export default function Settings({ navigate, onSignOut }: Props) {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 16, fontWeight: 800, color: '#111A3A' }}>Ayesha Rahman</div>
-              <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(17,26,58,0.5)', marginTop: 2 }}>Babysitter · Dhaka, Bangladesh 🇧🇩</div>
+              <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(17,26,58,0.5)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
+                Babysitter · Dhaka, Bangladesh <FlagIcon code="BD" width={14} radius={2}/>
+              </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 <span style={{ padding: '3px 10px', borderRadius: 20, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#10B981' }}>✓ Verified</span>
                 <span style={{ padding: '3px 10px', borderRadius: 20, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#F59E0B' }}>⭐ 4.9</span>
@@ -186,9 +189,9 @@ export default function Settings({ navigate, onSignOut }: Props) {
                         fontFamily: 'Inter', fontSize: 13.5, fontWeight: 500,
                         color: item.danger ? '#FF6B6B' : 'rgba(17,26,58,0.88)',
                       }}>{item.label}</div>
-                      {(item.sub || item.flag) && !item.toggle && (
-                        <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: item.active ? '#10B981' : 'rgba(17,26,58,0.35)', marginTop: 2 }}>
-                          {item.flag && <span style={{ marginRight: 4 }}>{item.flag}</span>}{item.sub}
+                      {(item.sub || item.flagCode) && !item.toggle && (
+                        <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: item.active ? '#10B981' : 'rgba(17,26,58,0.35)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          {item.flagCode && <FlagIcon code={item.flagCode} width={14} radius={2}/>}{item.sub}
                         </div>
                       )}
                     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import BottomNav from '../components/BottomNav'
 import type { Screen } from '../App'
+import FlagIcon from '../components/FlagIcon'
 
 interface Props { navigate: (s: Screen) => void }
 
@@ -64,7 +65,9 @@ export default function MarketInsights({ navigate }: Props) {
             </button>
           </div>
           <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A', marginBottom: 4 }}>Market Insights</div>
-          <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.4)' }}>Local demand data for Dhaka, Bangladesh 🇧🇩</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.4)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            Local demand data for Dhaka, Bangladesh <FlagIcon code="BD" width={16} radius={2}/>
+          </div>
         </div>
 
         {/* Period toggle */}
