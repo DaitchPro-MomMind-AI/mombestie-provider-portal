@@ -13,7 +13,7 @@ const FEATURES = [
   { icon: '👤', label: 'My Profile', sub: 'Edit & preview', screen: 'profile', color: '#246BFD' },
   { icon: '📅', label: 'Calendar', sub: 'Manage availability', screen: 'calendar', color: '#28A8FF' },
   { icon: '💰', label: 'Earnings', sub: '৳4,850 available', screen: 'earnings', color: '#10B981' },
-  { icon: '⭐', label: 'Reviews', sub: '4.9 · 47 reviews', screen: 'reviews', color: '#F59E0B' },
+  { icon: '⭐', label: 'Reviews', sub: 'No reviews yet', screen: 'reviews', color: '#F59E0B' },
   { icon: '🔔', label: 'Notifications', sub: '5 unread', screen: 'notifications', color: '#A855F7' },
   { icon: '✨', label: 'AI Pricing', sub: 'Smart recommendations', screen: 'smartpricing', color: '#246BFD' },
   { icon: '📊', label: 'Market Insights', sub: 'Local demand data', screen: 'marketinsights', color: '#28A8FF' },
@@ -63,10 +63,12 @@ export default function More({ navigate, onSignOut }: Props) {
               <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(17,26,58,0.5)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
                 Babysitter · Dhaka <FlagIcon code="BD" width={14} radius={2}/> · BDT ৳
               </div>
+              {/* MBPRV-62: no real reviews table exists yet -- dropped the
+                  fake "⭐ 4.9 / 47 Reviews" badges rather than show an
+                  invented rating. (Verified badge/name here are separate
+                  pre-existing fixture, out of this story's scope.) */}
               <div style={{ display: 'flex', gap: 6, marginTop: 7 }}>
                 <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#10B981' }}>✓ Verified</div>
-                <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#F59E0B' }}>⭐ 4.9</div>
-                <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(36,107,253,0.12)', border: '1px solid rgba(36,107,253,0.25)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#246BFD' }}>47 Reviews</div>
               </div>
             </div>
           </div>

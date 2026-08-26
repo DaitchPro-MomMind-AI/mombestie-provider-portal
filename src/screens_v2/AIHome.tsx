@@ -128,7 +128,7 @@ export default function AIHome({ navigate }: Props) {
           {[
             { label: '3 Bookings', color: '#246BFD' },
             { label: '₳4,850 Balance', color: '#10B981' },
-            { label: '4.9★ Rating', color: '#F59E0B' },
+            { label: 'No reviews yet', color: '#F59E0B' },
           ].map(s => (
             <div key={s.label} style={{
               padding: '4px 10px', borderRadius: 20,

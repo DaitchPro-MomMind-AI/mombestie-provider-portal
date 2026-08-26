@@ -60,8 +60,10 @@ export default function ProviderProfile({ navigate }: Props) {
                   </div>
                 </div>
                 <div style={{ fontFamily: 'Inter', fontSize: 13.5, color: 'rgba(0,0,0,0.55)', marginTop: 4 }}>Babysitter & Childcare Specialist</div>
+                {/* MBPRV-62: dropped the fake "⭐ 4.9 (47 reviews)" -- no
+                    real reviews table exists yet, so no rating is shown. */}
                 <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                  <div style={{ fontFamily: 'Inter', fontSize: 13, color: '#111A3A', fontWeight: 600 }}>⭐ 4.9 <span style={{ fontWeight: 400, color: 'rgba(0,0,0,0.45)' }}>(47 reviews)</span></div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>No reviews yet</div>
                   <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(0,0,0,0.45)' }}>📍 Dhaka · 5 km</div>
                 </div>
               </div>
@@ -148,9 +150,10 @@ export default function ProviderProfile({ navigate }: Props) {
               <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(17,26,58,0.5)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
                 Babysitter · Childcare · Dhaka <FlagIcon code="BD" width={15} radius={2}/>
               </div>
+              {/* MBPRV-62: dropped the fake "⭐ 4.9" badge -- no real
+                  reviews table exists yet. */}
               <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                 <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#10B981' }}>✓ Verified</div>
-                <div style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#F59E0B' }}>⭐ 4.9</div>
               </div>
             </div>
           </div>
@@ -178,8 +181,8 @@ export default function ProviderProfile({ navigate }: Props) {
         {/* Stats row */}
         <div style={{ padding: '0 16px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
           {[
-            { label: 'Rating', value: '4.9', icon: '⭐' },
-            { label: 'Reviews', value: '47', icon: '💬' },
+            { label: 'Rating', value: '—', icon: '⭐' },
+            { label: 'Reviews', value: '0', icon: '💬' },
             { label: 'Completed', value: '112', icon: '✅' },
             { label: 'Response', value: '<1h', icon: '⚡' },
           ].map(s => (

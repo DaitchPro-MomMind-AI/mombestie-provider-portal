@@ -132,9 +132,10 @@ export default function Settings({ navigate, onSignOut }: Props) {
               <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(17,26,58,0.5)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
                 Babysitter · Dhaka, Bangladesh <FlagIcon code="BD" width={14} radius={2}/>
               </div>
+              {/* MBPRV-62: dropped the fake "⭐ 4.9" badge -- no real reviews
+                  table exists yet, so no rating is shown. */}
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 <span style={{ padding: '3px 10px', borderRadius: 20, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#10B981' }}>✓ Verified</span>
-                <span style={{ padding: '3px 10px', borderRadius: 20, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', fontFamily: 'Inter', fontSize: 10.5, fontWeight: 600, color: '#F59E0B' }}>⭐ 4.9</span>
               </div>
             </div>
             <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(17,26,58,0.5)' }}>
