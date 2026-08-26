@@ -111,6 +111,18 @@ export default function AIHome({ navigate }: Props) {
           {orbState === 'idle' ? 'Your AI Business Partner' : orbState === 'thinking' ? 'Thinking...' : orbState === 'listening' ? 'Listening...' : 'Speaking...'}
         </div>
 
+        {/* MBPRV-53: persistent honest disclosure -- distinct from the
+            one-time greeting message below, which scrolls out of view.
+            Wording matches this repo's own OverviewPanel disclosure. */}
+        <div style={{
+          marginTop: 10, padding: '8px 14px', borderRadius: 12,
+          background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', maxWidth: 300,
+        }}>
+          <p style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 600, color: '#B8860B', textAlign: 'center', margin: 0 }}>
+            ⚠ Not connected yet -- your assistant needs a real AI model set up first. Replies below are scripted demo responses, not real AI-generated insight.
+          </p>
+        </div>
+
         {/* State indicators */}
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           {[
@@ -187,6 +199,14 @@ export default function AIHome({ navigate }: Props) {
 
       {/* Input */}
       <div style={{ padding: '10px 12px 0', flexShrink: 0, borderTop: '1px solid rgba(17,26,58,0.07)', background: 'rgba(255,255,255,0.95)', paddingBottom: 80 }}>
+        {/* MBPRV-56: voice input is a simulated state toggle, not a real
+            speech-to-text pipeline -- disclosed the moment it's engaged
+            rather than silently pretending to listen. */}
+        {orbState === 'listening' && (
+          <p style={{ fontFamily: 'Inter', fontSize: 10.5, color: '#B8860B', textAlign: 'center', margin: '0 0 8px' }}>
+            ⚠ Voice input isn't connected to a real speech-to-text service yet -- this is a visual state only.
+          </p>
+        )}
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
           {/* Voice button */}
           <button
