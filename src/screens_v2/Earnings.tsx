@@ -62,10 +62,24 @@ export default function Earnings({ navigate, providerId, countryCode, countries 
   const currency = completed[0]?.currency ?? bookings[0]?.currency ?? country?.currency ?? null
 
   const periodCompleted = useMemo(() => completed.filter(b => inPeriod(b.scheduled_at, period, now)), [completed, period])
-  const grossCents = periodCompleted.reduce((s, b) => s + b.price_cents, 0)
-  const commissionCents = periodCompleted.reduce((s, b) => s + b.commission_cents, 0)
-  const netCents = grossCents - commissionCents
-  const pendingNetCents = pending.reduce((s, b) => s + (b.price_cents - b.commission_cents), 0)
+
+  // MBPRV-45 AC #3: a provider whose real bookings span more than one real
+  // currency gets real per-currency subtotals, never one blended number
+  // that would silently sum e.g. USD and BDT together as if equal.
+  type Subtotal = { currency: string; grossCents: number; commissionCents: number; netCents: number }
+  function subtotalsByCurrency(rows: ProviderBooking[]): Subtotal[] {
+    const map = new Map<string, Subtotal>()
+    for (const b of rows) {
+      const s = map.get(b.currency) ?? { currency: b.currency, grossCents: 0, commissionCents: 0, netCents: 0 }
+      s.grossCents += b.price_cents
+      s.commissionCents += b.commission_cents
+      s.netCents += b.price_cents - b.commission_cents
+      map.set(b.currency, s)
+    }
+    return [...map.values()].sort((a, b) => a.currency.localeCompare(b.currency))
+  }
+  const periodSubtotals = useMemo(() => subtotalsByCurrency(periodCompleted), [periodCompleted])
+  const pendingSubtotals = useMemo(() => subtotalsByCurrency(pending), [pending])
 
   // MBPRV-46: real breakdown by service category, for the current period.
   const byCategory = useMemo(() => {
@@ -129,9 +143,25 @@ export default function Earnings({ navigate, providerId, countryCode, countries 
             border: '1px solid rgba(36,107,253,0.35)',
           }}>
             <div style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 500, color: 'rgba(17,26,58,0.5)', letterSpacing: 0.5, marginBottom: 6 }}>NET EARNED · {PERIODS[period].toUpperCase()}</div>
-            <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: loading ? 20 : 40, fontWeight: 800, color: '#111A3A', letterSpacing: '-1px', lineHeight: 1 }}>
-              {loading ? 'Loading…' : currency ? moneyStr(netCents, currency) : 'No completed bookings yet'}
-            </div>
+            {loading ? (
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 20, fontWeight: 800, color: '#111A3A' }}>Loading…</div>
+            ) : periodSubtotals.length === 0 ? (
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: '#111A3A' }}>No completed bookings yet</div>
+            ) : periodSubtotals.length === 1 ? (
+              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 40, fontWeight: 800, color: '#111A3A', letterSpacing: '-1px', lineHeight: 1 }}>
+                {moneyStr(periodSubtotals[0].netCents, periodSubtotals[0].currency)}
+              </div>
+            ) : (
+              // MBPRV-45 AC #3: real bookings span more than one real
+              // currency -- per-currency subtotals, never blended into one number.
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {periodSubtotals.map(s => (
+                  <div key={s.currency} style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 22, fontWeight: 800, color: '#111A3A' }}>
+                    {moneyStr(s.netCents, s.currency)}
+                  </div>
+                ))}
+              </div>
+            )}
             <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgba(17,26,58,0.4)', marginTop: 8, lineHeight: 1.5 }}>
               Real sum of completed bookings' price minus commission -- not a claim that this amount has already reached a real payout account (see below).
             </div>
@@ -141,7 +171,13 @@ export default function Earnings({ navigate, providerId, countryCode, countries 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div style={{ padding: '14px', borderRadius: 16, background: 'rgba(17,26,58,0.05)', border: '1px solid rgba(17,26,58,0.08)' }}>
               <div style={{ fontSize: 20, marginBottom: 6 }}>⏳</div>
-              <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 18, fontWeight: 800, color: '#F59E0B' }}>{currency ? moneyStr(pendingNetCents, currency) : '—'}</div>
+              {pendingSubtotals.length === 0 ? (
+                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 18, fontWeight: 800, color: '#F59E0B' }}>—</div>
+              ) : pendingSubtotals.length === 1 ? (
+                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 18, fontWeight: 800, color: '#F59E0B' }}>{moneyStr(pendingSubtotals[0].netCents, pendingSubtotals[0].currency)}</div>
+              ) : (
+                pendingSubtotals.map(s => <div key={s.currency} style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 800, color: '#F59E0B' }}>{moneyStr(s.netCents, s.currency)}</div>)
+              )}
               <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.45)', marginTop: 3 }}>Pending</div>
               <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: 'rgba(17,26,58,0.3)', marginTop: 2 }}>{pending.length} booking{pending.length === 1 ? '' : 's'}</div>
             </div>
@@ -168,19 +204,30 @@ export default function Earnings({ navigate, providerId, countryCode, countries 
             ))}
           </div>
 
-          {/* Period totals */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
-            {[
-              { label: 'Gross', value: currency ? moneyStr(grossCents, currency) : '—', color: '#111A3A' },
-              { label: 'Commission', value: currency ? moneyStr(commissionCents, currency) : '—', color: '#FF6B6B' },
-              { label: 'Net Earned', value: currency ? moneyStr(netCents, currency) : '—', color: '#10B981' },
-            ].map(s => (
-              <div key={s.label} style={{ padding: '12px 10px', borderRadius: 14, background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.07)', textAlign: 'center' }}>
-                <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 800, color: s.color }}>{s.value}</div>
-                <div style={{ fontFamily: 'Inter', fontSize: 9, color: 'rgba(17,26,58,0.35)', marginTop: 4, lineHeight: 1.3 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
+          {/* Period totals -- one row per real currency in use, never a
+              single number blending multiple currencies (MBPRV-45 AC #3). */}
+          {periodSubtotals.length === 0 ? (
+            <div style={{ padding: '12px 10px', borderRadius: 14, background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.07)', textAlign: 'center', marginBottom: 16, fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(17,26,58,0.4)' }}>
+              No completed bookings in this period.
+            </div>
+          ) : (
+            <div style={{ marginBottom: 16 }}>
+              {periodSubtotals.map(s => (
+                <div key={s.currency} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
+                  {[
+                    { label: `Gross${periodSubtotals.length > 1 ? ` (${s.currency})` : ''}`, value: moneyStr(s.grossCents, s.currency), color: '#111A3A' },
+                    { label: 'Commission', value: moneyStr(s.commissionCents, s.currency), color: '#FF6B6B' },
+                    { label: 'Net Earned', value: moneyStr(s.netCents, s.currency), color: '#10B981' },
+                  ].map(c => (
+                    <div key={c.label} style={{ padding: '12px 10px', borderRadius: 14, background: 'rgba(17,26,58,0.04)', border: '1px solid rgba(17,26,58,0.07)', textAlign: 'center' }}>
+                      <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 13, fontWeight: 800, color: c.color }}>{c.value}</div>
+                      <div style={{ fontFamily: 'Inter', fontSize: 9, color: 'rgba(17,26,58,0.35)', marginTop: 4, lineHeight: 1.3 }}>{c.label}</div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Bar chart -- real last-7-days net totals */}
           <div style={{
@@ -252,13 +299,15 @@ export default function Earnings({ navigate, providerId, countryCode, countries 
             </p>
           </div>
 
-          {/* MBPRV-48: real CSV export */}
-          <button onClick={exportCsv} disabled={completed.length === 0} style={{
-            width: '100%', padding: '13px', borderRadius: 13, border: '1px solid rgba(36,107,253,0.3)', cursor: completed.length === 0 ? 'not-allowed' : 'pointer',
+          {/* MBPRV-48: real CSV export -- always enabled, since a provider
+              with zero real completed bookings should still get a real,
+              valid (header-only) CSV rather than be blocked from exporting. */}
+          <button onClick={exportCsv} disabled={loading} style={{
+            width: '100%', padding: '13px', borderRadius: 13, border: '1px solid rgba(36,107,253,0.3)', cursor: loading ? 'wait' : 'pointer',
             background: 'rgba(36,107,253,0.08)', fontFamily: 'Inter', fontSize: 13, fontWeight: 700, color: '#246BFD',
-            marginBottom: 16, opacity: completed.length === 0 ? 0.5 : 1,
+            marginBottom: 16, opacity: loading ? 0.5 : 1,
           }}>
-            ⬇️ Export Completed Bookings as CSV
+            ⬇️ Export Completed Bookings as CSV{completed.length === 0 ? ' (empty)' : ''}
           </button>
 
           {/* Transactions -- real completed bookings, honest "Household
