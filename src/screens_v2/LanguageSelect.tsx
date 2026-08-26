@@ -6,6 +6,10 @@ interface Props {
   navigate: (s: Screen) => void
   country: string
   countryCode: string
+  /** MBPRV-44: reports which language was picked and whether it's a real
+   * RTL language, so the app can actually apply an RTL layout -- previously
+   * this selection was made and then discarded, with no onSelect at all. */
+  onSelect: (languageCode: string, rtl: boolean) => void
 }
 
 // Real per-country official/native language data. Previously only 13 of the
@@ -242,13 +246,15 @@ const LANDMARKS: Record<string, { emoji: string; name: string }> = {
   DEFAULT: { emoji: '🌍', name: 'Local landmark' },
 }
 
-export default function LanguageSelect({ navigate, country, countryCode }: Props) {
+export default function LanguageSelect({ navigate, country, countryCode, onSelect }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
   const langs = COUNTRY_LANGUAGES[countryCode] ?? COUNTRY_LANGUAGES.DEFAULT
   const landmark = LANDMARKS[countryCode] ?? LANDMARKS.DEFAULT
 
   const handleSelect = (code: string) => {
     setSelected(code)
+    const rtl = langs.find(l => l.code === code)?.rtl ?? false
+    onSelect(code, rtl)
     setTimeout(() => navigate('providertype'), 400)
   }
 

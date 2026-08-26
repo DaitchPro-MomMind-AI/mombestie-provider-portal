@@ -352,7 +352,7 @@ export function StatusPill({ status }: { status: BookingStatus }) {
 // Providers work from their phones (see docs/ARCHITECTURE.md native-app
 // section, 2026-08-13) so this app is native-first the same way the
 // customer app is, not a "responsive dashboard that also fits on mobile."
-function PhoneShell({ children, dark }: { children: React.ReactNode; dark?: boolean }) {
+function PhoneShell({ children, dark, dir }: { children: React.ReactNode; dark?: boolean; dir?: 'rtl' | 'ltr' }) {
   const [vw, setVw] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 844)
   useEffect(() => {
@@ -378,7 +378,7 @@ function PhoneShell({ children, dark }: { children: React.ReactNode; dark?: bool
           <div style={{ position: 'fixed', width: 400, height: 400, borderRadius: '50%', background: 'rgba(98,153,213,0.13)', filter: 'blur(70px)', bottom: '-80px', right: '-100px', pointerEvents: 'none' }} />
         </>
       )}
-      <div className="relative flex flex-col overflow-hidden" data-dark={dark ? 'true' : undefined} style={{
+      <div className="relative flex flex-col overflow-hidden" data-dark={dark ? 'true' : undefined} dir={dir ?? 'ltr'} style={{
         width: isMobile ? '100%' : frameW,
         height: isMobile ? '100dvh' : frameH,
         maxWidth: isMobile ? '100%' : frameW,
@@ -543,6 +543,15 @@ export default function App() {
     window.localStorage.setItem('mombestie_provider_dark', darkMode ? 'true' : 'false')
   }, [darkMode])
 
+  // MBPRV-44: real RTL layout, driven by whether the language chosen in
+  // LanguageSelect is a real right-to-left language (Arabic, Urdu, Hebrew,
+  // etc. -- see COUNTRY_LANGUAGES' `rtl` flags). Previously the selected
+  // language code was thrown away entirely (no onSelect callback existed),
+  // so nothing downstream ever reflected it. `dir="rtl"` on the phone-frame
+  // root flips the whole subtree's layout via the browser's own CSS
+  // bidi handling, rather than hand-mirroring every screen's flexbox.
+  const [isRTL, setIsRTL] = useState(false)
+
   const routeAfterAuth = async (uid: string) => {
     setUserId(uid)
     const [familyApp, healthcareApp] = await Promise.all([getMyProviderApplication(uid), getMyHealthcareApplication(uid)])
@@ -582,7 +591,7 @@ export default function App() {
   }
 
   if (view === 'loading') {
-    return <PhoneShell dark={darkMode}><div className="h-full flex items-center justify-center bg-[#FFFCFA]"><span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" /></div></PhoneShell>
+    return <PhoneShell dark={darkMode} dir={isRTL ? 'rtl' : 'ltr'}><div className="h-full flex items-center justify-center bg-[#FFFCFA]"><span className="w-8 h-8 rounded-full border-2 border-[#F0E8E4] border-t-[#EE674E] inline-block spin-slow" /></div></PhoneShell>
   }
 
   if (view === 'auth') {
@@ -591,7 +600,7 @@ export default function App() {
       if (user) await routeAfterAuth(user.id)
     }
     return (
-      <PhoneShell dark={darkMode}>
+      <PhoneShell dark={darkMode} dir={isRTL ? 'rtl' : 'ltr'}>
         {v2Screen === 'signin' ? (
           <SignIn navigate={setV2Screen} onSignIn={async (email, password) => {
             const res = await signIn(email, password)
@@ -624,13 +633,13 @@ export default function App() {
   }
 
   if (view === 'choose-type') {
-    return <PhoneShell dark={darkMode}><ProviderTypeChoice
+    return <PhoneShell dark={darkMode} dir={isRTL ? 'rtl' : 'ltr'}><ProviderTypeChoice
       onChoose={k => setView(k === 'family' ? 'onboarding-family' : 'onboarding-healthcare')}
       onCancel={() => setView(hasApplication ? 'dashboard' : 'auth')} /></PhoneShell>
   }
 
   if (view === 'onboarding-family') {
-    return <PhoneShell dark={darkMode}><OnboardingWizard
+    return <PhoneShell dark={darkMode} dir={isRTL ? 'rtl' : 'ltr'}><OnboardingWizard
       onSubmit={async d => {
         if (!userId) { setView('auth'); return }
         await submitProviderApplication({
@@ -650,13 +659,13 @@ export default function App() {
   }
 
   if (view === 'onboarding-healthcare') {
-    return <PhoneShell dark={darkMode}><HealthcareWizard userId={userId!}
+    return <PhoneShell dark={darkMode} dir={isRTL ? 'rtl' : 'ltr'}><HealthcareWizard userId={userId!}
       onSubmitted={() => { setPendingKind('healthcare'); setHasApplication(true); setView('pending') }}
       onCancel={() => setView('choose-type')} /></PhoneShell>
   }
 
   if (view === 'pending') {
-    return <PhoneShell dark={darkMode}><PendingStatusScreen userId={userId!} kind={pendingKind} onBackToLogin={handleSignOut} /></PhoneShell>
+    return <PhoneShell dark={darkMode} dir={isRTL ? 'rtl' : 'ltr'}><PendingStatusScreen userId={userId!} kind={pendingKind} onBackToLogin={handleSignOut} /></PhoneShell>
   }
 
   // Accept moves Requested -> Confirmed (a real commitment to show up);
@@ -683,7 +692,7 @@ export default function App() {
     : null
 
   return (
-    <PhoneShell dark={darkMode}>
+    <PhoneShell dark={darkMode} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Real registration flow: Country -> Language -> Provider Type ->
           Onboarding (family-service) or the real HealthcareWizard
           (different table/fields entirely -- license, specialty,
@@ -694,7 +703,8 @@ export default function App() {
       {v2Screen === 'country' ? (
         <CountrySelect navigate={setV2Screen} onSelect={(name, code) => { setRegCountry({ name, code }); setV2Screen('language') }} />
       ) : v2Screen === 'language' ? (
-        <LanguageSelect navigate={setV2Screen} country={regCountry.name} countryCode={regCountry.code} />
+        <LanguageSelect navigate={setV2Screen} country={regCountry.name} countryCode={regCountry.code}
+          onSelect={(_code, rtl) => setIsRTL(rtl)} />
       ) : v2Screen === 'providertype' ? (
         <ProviderType navigate={setV2Screen} onContinue={(item, group) => {
           setRegCategory({ item, group })
