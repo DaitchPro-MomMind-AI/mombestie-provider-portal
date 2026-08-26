@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getCurrentUser, signOut, signIn, signUp, requestPasswordReset, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication, listCountries, type CountryFee, getEligiblePaymentMethods, type EligiblePaymentMethod } from './services'
+import { getCurrentUser, signOut, signIn, signUp, requestPasswordReset, getMyProviderApplication, getMyHealthcareApplication, submitProviderApplication, listCountries, type CountryFee } from './services'
 import { ProviderTypeChoice } from './screens/ProviderTypeChoice'
 import { HealthcareWizard } from './screens/HealthcareWizard'
 import { PendingStatusScreen } from './screens/PendingStatusScreen'
@@ -434,57 +434,11 @@ function ProviderBottomNav({ active, onChange }: { active: NavId; onChange: (id:
   )
 }
 
-function Card({ title, compact, children }: { title?: string; compact?: boolean; children: React.ReactNode }) {
-  return (
-    <div className={`glass-card rounded-2xl ${compact ? 'p-3' : 'p-5'}`}>
-      {title && <p className="text-[10px] font-semibold text-[#6E6E73] uppercase tracking-wide mb-2 leading-tight">{title}</p>}
-      {children}
-    </div>
-  )
-}
-
-// Real, country-aware payout methods for the Earnings screen -- replaces
-// a hardcoded "requires Stripe Connect" line that assumed every provider
-// worldwide uses the same US-centric processor. Uses the same centralized
-// eligibility engine as the registration-fee flow (docs/ARCHITECTURE.md
-// §15), just with transaction_type='provider_payout'. No "connect"
-// button here -- payouts are written by a trusted service-role process
-// only (provider_payouts table), so there's no real client action to
-// wire yet; this is an honest "here's what's eligible" status, not a
-// working connect flow.
-function PayoutMethodsCard({ countryCode, countries }: { countryCode: string | null; countries: CountryFee[] }) {
-  const [methods, setMethods] = useState<EligiblePaymentMethod[] | null>(null)
-  const country = countries.find(c => c.country_code === countryCode)
-
-  useEffect(() => {
-    if (!countryCode || !country) { setMethods(null); return }
-    let cancelled = false
-    getEligiblePaymentMethods(countryCode, country.currency, 'provider_payout').then(m => { if (!cancelled) setMethods(m) })
-    return () => { cancelled = true }
-  }, [countryCode, country?.currency])
-
-  return (
-    <Card title="Payout methods">
-      {!countryCode ? (
-        <p className="text-sm text-[#6E6E73]">Complete your provider registration to see payout methods for your country.</p>
-      ) : methods === null ? (
-        <p className="text-sm text-[#6E6E73]">Loading…</p>
-      ) : methods.length === 0 ? (
-        <p className="text-sm text-[#6E6E73]">No payout method is enabled for {country?.country_name ?? countryCode} yet. MomBestie is rolling out payout providers by country -- see Settings → Contact Support for status.</p>
-      ) : (
-        <div className="space-y-2">
-          {methods.map(m => (
-            <div key={m.provider_code} className="flex items-center justify-between px-3 py-2.5 rounded-xl" style={{ background: '#FFF8F4', border: '1.5px solid #F0E8E4' }}>
-              <span className="text-sm font-semibold text-[#242424]">{m.display_name}</span>
-              <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${m.mode === 'live' ? 'bg-[#E8F5EE] text-[#55A67A]' : 'bg-[#FEF3CD] text-[#B8860B]'}`}>{m.mode}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      <p className="text-[11px] text-[#6E6E73] mt-3">Payout options come from your country's configuration, same eligibility engine as your registration fee -- never hardcoded to one processor.</p>
-    </Card>
-  )
-}
+// Card and PayoutMethodsCard, formerly defined here, were dead code (never
+// rendered by anything -- the v2 redesign replaced this screen entirely).
+// PayoutMethodsCard's real logic (getEligiblePaymentMethods eligibility
+// engine, honest empty state) now lives, actually wired up, in
+// screens_v2/Earnings.tsx (MBPRV-45/46/48).
 
 type View = 'loading' | 'auth' | 'choose-type' | 'onboarding-family' | 'onboarding-healthcare' | 'pending' | 'dashboard'
 
@@ -733,7 +687,7 @@ export default function App() {
       ) : v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} providerId={providerId} />
         : v2Screen === 'ai' ? <AIHome navigate={setV2Screen} />
         : v2Screen === 'messages' ? <Messages navigate={setV2Screen} />
-        : v2Screen === 'earnings' ? <Earnings navigate={setV2Screen} />
+        : v2Screen === 'earnings' ? <Earnings navigate={setV2Screen} providerId={providerId} countryCode={providerCountry} countries={countries} />
         : v2Screen === 'settings' ? <SettingsV2 navigate={setV2Screen} onSignOut={handleSignOut} />
         : v2Screen === 'more' ? <MoreV2 navigate={setV2Screen} onSignOut={handleSignOut} />
         : v2Screen === 'calendar' ? <Calendar navigate={setV2Screen} />
