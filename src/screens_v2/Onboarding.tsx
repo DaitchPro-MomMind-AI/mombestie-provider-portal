@@ -9,6 +9,9 @@ interface Props {
   countryCode: string
   countryName: string
   currencySymbol: string
+  /** Real commission_pct from country_config for this country (MBPRV-37),
+   * or null if that country's row hasn't set one yet. */
+  commissionPct: number | null
   userId: string
   onSubmitted: () => void
 }
@@ -164,7 +167,7 @@ const CURRENCIES: { code: string; symbol: string; name: string }[] = [
  * concept -- see PaymentMethodPicker.tsx for the fee flow, not yet
  * re-integrated into this redesigned flow).
  */
-export default function Onboarding({ navigate, category, categoryGroup, countryCode, countryName, currencySymbol, userId, onSubmitted }: Props) {
+export default function Onboarding({ navigate, category, categoryGroup, countryCode, countryName, currencySymbol, commissionPct, userId, onSubmitted }: Props) {
   const PAYOUT_METHODS = payoutMethodsFor(countryCode)
   const [step, setStep] = useState<Step>('about')
   const [submitting, setSubmitting] = useState(false)
@@ -524,6 +527,29 @@ export default function Onboarding({ navigate, category, categoryGroup, countryC
             </div>
             <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.35)', marginTop: 6 }}>
               Defaulted to {selectedCurrency.name} ({selectedCurrency.code}) based on {countryName} -- change it above if you'd rather quote in a different currency.
+            </div>
+
+            {/* MBPRV-37: real commission_pct from country_config, not a
+                hardcoded platform-wide number -- honest fallback if this
+                country's row hasn't set one yet, rather than guessing. */}
+            <div style={{
+              marginTop: 14, padding: '12px 14px', borderRadius: 12,
+              background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)',
+            }}>
+              {commissionPct != null ? (
+                <>
+                  <div style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 700, color: '#0D9668' }}>
+                    MomBestie commission for {countryName}: {(commissionPct * 100).toFixed(0)}%
+                  </div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(17,26,58,0.4)', marginTop: 3 }}>
+                    On a {selectedCurrency.symbol}{hourlyRate || '0'} booking, you'd take home ~{selectedCurrency.symbol}{(parseFloat(hourlyRate || '0') * (1 - commissionPct)).toFixed(2)} per hour after commission.
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgba(17,26,58,0.4)' }}>
+                  ⚠ Commission rate for {countryName} isn't configured yet -- your real rate will be shown once it's set, not a guessed default.
+                </div>
+              )}
             </div>
           </div>
         )}

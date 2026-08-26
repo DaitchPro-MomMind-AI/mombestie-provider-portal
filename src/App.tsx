@@ -709,6 +709,7 @@ export default function App() {
           category={regCategory.item} categoryGroup={regCategory.group}
           countryCode={regCountry.code} countryName={regCountry.name}
           currencySymbol={countries.find(c => c.country_code === regCountry.code)?.currency_symbol ?? '$'}
+          commissionPct={countries.find(c => c.country_code === regCountry.code)?.commission_pct ?? null}
           userId={userId!}
           onSubmitted={() => { setPendingKind('family'); setHasApplication(true); setV2Screen('dashboard'); setView('pending') }} />
       ) : v2Screen === 'bookings' ? <Bookings navigate={setV2Screen} providerId={providerId} />
